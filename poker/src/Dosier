@@ -1,0 +1,27 @@
+Numeración de las cartas:
+A == 14 o 1
+K == 13
+Q == 12
+J == 11
+T == 10
+9 == 9
+...
+2 == 2
+
+Numeración de los palos:
+h == 0
+d == 1
+c == 2
+s == 3
+
+Numeración de los valores de las manos:
+High card      == 0
+Pair           == 1
+Two Pair       == 2
+Trio           == 3
+Straight       == 4
+Flush          == 5
+Full           == 6
+Poker          == 7
+Straight Flush == 8
+Royal Flush    == 9
