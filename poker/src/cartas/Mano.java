@@ -105,14 +105,14 @@ public class Mano {
 				++gutshot;
 			}
 		}
-		if(escalera == 4) {
+		if(escalera == 4&& gutshot==0) {
 			mejor_mano = mano;
 			return true;
 		}
-		if(escalera == 3 && gutshot == 1) {
+		if(escalera >= 3 && gutshot == 1) {
 			this.gutshot = true;
 		}
-		else if(escalera == 3) {
+		else if(escalera == 3&& gutshot==0) {
 			open_ended = true;
 		}
 		return false;
