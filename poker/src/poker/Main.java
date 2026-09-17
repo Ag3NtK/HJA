@@ -5,7 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import Cartas.Carta;
+import cartas.Carta;
 
 public class Main {
 

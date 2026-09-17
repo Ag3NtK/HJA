@@ -1,4 +1,4 @@
-package Cartas;
+package cartas;
 import java.util.*;
 
 public class Mano {

@@ -1,4 +1,4 @@
-package Cartas;
+package cartas;
 
 public class Carta {
 	private int palo;
