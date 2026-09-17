@@ -23,7 +23,7 @@ public class Mano {
 	}
 	
 	private void comprobar() {
-		if(esColor()) {
+		/*if(esColor()) {
 			if(esEscalera()) {
 				if(mano.get(1).get_valor()==13) {
 					manita=9;
@@ -36,7 +36,7 @@ public class Mano {
 				manita=5;
 				return;
 			}
-		}
+		}*/
 		if(manita == -1 && esPoker()) {
 			manita=7;
 			return;
@@ -93,18 +93,26 @@ public class Mano {
 	//TODO hacer comprobacion del gutshot y probar
 	private boolean esEscalera(){
 		int escalera = 0;
+		int gutshot = 0;
 		for(int i = 0; i < 4; i++) {
 			if(mano.get(i).get_valor() == mano.get(i+1).get_valor()+1) { //caso base
 				escalera++;
 			}else if(mano.get(i).get_valor() == 14 && mano.get(i).get_valor() == 5) {
 				escalera++;
 			}
+			else if(mano.get(i).get_valor() == mano.get(i+1).get_valor()+2) {
+				++escalera;
+				++gutshot;
+			}
 		}
 		if(escalera == 4) {
 			mejor_mano = mano;
 			return true;
 		}
-		if(escalera == 3) {
+		if(escalera == 3 && gutshot == 1) {
+			this.gutshot = true;
+		}
+		else if(escalera == 3) {
 			open_ended = true;
 		}
 		return false;
@@ -185,6 +193,14 @@ public class Mano {
 		}
 		return false;
 	}
+	
+	private boolean esEscaleraColor() {
+		return esColor() && esEscalera();
+	}
+	private boolean esEscaleraReal() {
+		return esColor() && esEscalera() && mano.get(1).get_valor() == 13;
+	}
+		
 	//TODO probar
 	public String mejorManoString() {
 		String respuesta = "";
@@ -211,24 +227,34 @@ public class Mano {
 		switch (manita) {
 		case 0:
 			respuestaMano += "High Card with " + mejor_mano.get(0).get_nombre_valor();
+			break;
 		case 1:
 			respuestaMano += "Pair of "+ mejor_mano.get(0).get_nombre_valor()+"s";
+			break;
 		case 2:
 			respuestaMano += "Two Pair of "+ mejor_mano.get(0).get_nombre_valor()+"s and "+ mejor_mano.get(2).get_nombre_valor()+"s";
+			break;
 		case 3:
 			respuestaMano += "Three of a kind ("+ mejor_mano.get(0).get_nombre_valor()+"s)";
+			break;
 		case 4:
 			respuestaMano += "Straight";
+			break;
 		case 5:
 			respuestaMano += "Flush";
+			break;
 		case 6: //jodienda de hacerlo
 			respuestaMano += "";
+			break;
 		case 7:
 			respuestaMano += "Poker of "+ mejor_mano.get(0).get_nombre_valor()+"s";
+			break;
 		case 8:
 			respuestaMano += "Straight Flush";
+			break;
 		case 9:
 			respuestaMano += "Royal Flush";
+			break;
 		}
 		
 		if(flush_draw)

@@ -5,7 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import cartas.Carta;
+import cartas.*;
 
 public class Main {
 
@@ -29,8 +29,12 @@ public class Main {
                 for (int i = 0; i < linea.length(); i += 2) {
                     char valor = linea.charAt(i);
                     char palo = linea.charAt(i + 1);
-                    mano.add(new Carta(valor, palo));
+                    mano.add(new Carta("" + valor + palo));
                 }
+                mano.sort(Carta.POR_VALOR_DESC);
+                Mano nuestraMano = new Mano(mano);
+                System.out.println(nuestraMano.infoMano());
+                nuestraMano.infoMano();
 
             } catch (IOException e) {
                 System.out.println("Error al leer el fichero: " + e.getMessage());
