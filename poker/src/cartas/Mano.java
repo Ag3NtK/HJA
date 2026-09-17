@@ -97,7 +97,7 @@ public class Mano {
 		for(int i = 0; i < 4; i++) {
 			if(mano.get(i).get_valor() == mano.get(i+1).get_valor()+1) { //caso base
 				escalera++;
-			}else if(mano.get(i).get_valor() == 14 && mano.get(i).get_valor() == 5) {
+			}else if(mano.get(i).get_valor() == 14 && mano.get(4).get_valor() == 2) {
 				escalera++;
 			}
 			else if(mano.get(i).get_valor() == mano.get(i+1).get_valor()+2) {
