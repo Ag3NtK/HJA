@@ -37,7 +37,7 @@ public class Main {
 	                mano.sort(Carta.POR_VALOR_DESC);
 	                Mano nuestraMano = new Mano(mano);
 	                System.out.println(nuestraMano.infoMano());
-	                nuestraMano.infoMano();
+	                //nuestraMano.infoMano();
 	                pw.print(nuestraMano.infoMano());
 	                pw.println();
         		}
@@ -66,13 +66,13 @@ public class Main {
 	                if(mesa == 3) {
 	                	cartas.sort(Carta.POR_VALOR_DESC);
 	                	nuestraMano = new Mano(cartas);
-	                    System.out.println(nuestraMano.infoMano());
-	                    nuestraMano.infoMano();
-	                    pw.print(nuestraMano.infoMano());
-	                    pw.println();
 	                }else {
 	                	nuestraMano = obtenerMejorMano(cartas);
 	                }
+	                System.out.println(nuestraMano.infoMano());
+                    //nuestraMano.infoMano();
+                    pw.print(nuestraMano.infoMano());
+                    pw.println();
         		}
                 
 
