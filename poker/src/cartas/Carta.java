@@ -15,18 +15,18 @@ public class Carta {
 	        Comparator.comparingInt(Carta::get_valor).reversed();
 	
 	public int get_palo() {
-		return palo.getSymbol();
+		return palo.getValue();
 	}
 	
 	public int get_valor() {
 		return valor.getValue();
 	}
 	//
-	//TODO probar
+	
 	public String get_carta_String() {
 		return "" + valor.getSymbol() + palo.getSymbol();
 	}
-	//TODO probar
+	
 	public String get_nombre_valor() {
 		switch (this.valor.getSymbol()) {
 	    case 'A':

@@ -1,17 +1,17 @@
 package cartas;
 
 public enum Suit {
-	HEARTS('r', 'h'),
-	DIAMONDS('r', 'd'),
-	CLUBS('b', 'c'),
-	SPADES('b', 's');	//	Color (b)lack y (r)ed
+	HEARTS(0, 'h'),
+	DIAMONDS(1, 'd'),
+	CLUBS(2, 'c'),
+	SPADES(3, 's');	//	Color (b)lack y (r)ed
 
-	private final char color;
+	private final int valor;
 	private final char symbol;
 
-	Suit(char value, char symbol) {
+	Suit(int value, char symbol) {
 		this.symbol = symbol;
-		this.color = value;
+		this.valor = value;
 	}
 
 	public static Suit fromSymbol(char symbol) {
@@ -28,8 +28,8 @@ public enum Suit {
 		return symbol;
 	}
 	
-	public char getColor() {
-		return color;
+	public int getValue() {
+		return valor;
 	}
 }
 

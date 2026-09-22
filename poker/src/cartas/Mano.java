@@ -23,26 +23,24 @@ public class Mano {
 	}
 	
 	private void comprobar() {
-		/*if(esColor()) {
-			if(esEscalera()) {
-				if(mano.get(1).get_valor()==13) {
-					manita=9;
-					return;
-				}else {
-					manita=8;
-					return;
-				}
-			}else {
-				manita=5;
-				return;
-			}
-		}*/
+		if(esEscaleraReal()) {
+			manita = 9;
+			return;
+		}
+		if(manita == -1 && esEscaleraColor()) {
+			manita = 8;
+			return;
+		}
 		if(manita == -1 && esPoker()) {
 			manita=7;
 			return;
 		}
 		if(manita == -1 && esFull()) {
 			manita=6;
+			return;
+		}
+		if(manita == -1 && esColor()) {
+			manita = 5;
 			return;
 		}
 		if(manita == -1 && esEscalera()) {
@@ -66,7 +64,7 @@ public class Mano {
 			manita = 0;
 		}
 	}
-	//TODO probar (posiblemente se pueda mejorar la comparacion :)
+
 	private boolean esColor() {
 		ArrayList<Integer> lista = new ArrayList<>(Arrays.asList(0, 0, 0, 0));
 		for(int i = 0; i < 5; i++) {
@@ -90,7 +88,8 @@ public class Mano {
 			return false;
 		}
 	}
-	//TODO hacer comprobacion del gutshot y probar
+	//TODO en el caso de AhAd7c4s2h devuelve gutshot cuando no lo es
+	// con AhAdAc7s2h da open_ended
 	private boolean esEscalera(){
 		int escalera = 0;
 		int gutshot = 0;
@@ -117,7 +116,7 @@ public class Mano {
 		}
 		return false;
 	}
-	//TODO probar
+	
 	private boolean esPoker(){ 
 		if(mano.get(0).get_valor() == mano.get(1).get_valor() &&
 		   mano.get(0).get_valor() == mano.get(2).get_valor() &&
@@ -137,7 +136,7 @@ public class Mano {
 		}
 		return false;
 	}
-	//TODO probar
+
 	private boolean esFull() {
 		if(mano.get(0).get_valor() == mano.get(1).get_valor() &&
 		   mano.get(0).get_valor() == mano.get(2).get_valor() &&
@@ -153,7 +152,7 @@ public class Mano {
 		}
 		return false;
 	}
-	//TODO probar
+	
 	private boolean esTrio() {
 		for(int i = 0; i < 3; i++) {
 			if(mano.get(i).get_valor() == mano.get(i+1).get_valor() && mano.get(i).get_valor() == mano.get(i+2).get_valor()) {
@@ -165,7 +164,7 @@ public class Mano {
 		}
 		return false;
 	}
-	//TODO probar
+	
 	private boolean esDoblePareja() {
 		for(int i = 0; i < 4; i++) {
 			if(mano.get(i).get_valor() == mano.get(i+1).get_valor()) {
@@ -182,7 +181,7 @@ public class Mano {
 		}
 		return false;
 	}
-	//TODO probar
+	
 	private boolean esPareja() {
 		for(int i = 0; i < 4; i++) {
 			if(mano.get(i).get_valor() == mano.get(i+1).get_valor()) {
@@ -197,11 +196,11 @@ public class Mano {
 	private boolean esEscaleraColor() {
 		return esColor() && esEscalera();
 	}
+	
 	private boolean esEscaleraReal() {
 		return esColor() && esEscalera() && mano.get(1).get_valor() == 13;
 	}
 		
-	//TODO probar
 	public String mejorManoString() {
 		String respuesta = "";
 		for(int i = 0; i < mejor_mano.size(); i++) {
@@ -209,7 +208,13 @@ public class Mano {
 		}
 		return respuesta;
 	}
-	
+	public String manoString() {
+		String respuesta = "";
+		for(int i = 0; i < mano.size(); i++) {
+			respuesta += mano.get(i).get_carta_String();
+		}
+		return respuesta;
+	}
 	public int mejorManoInt() {
 		return manita;
 	}
@@ -217,10 +222,9 @@ public class Mano {
 	public ArrayList<Carta> mejorManoArray(){
 		return mejor_mano;
 	}
-	// esto no se si hacerlo aqui o fuera cuando escribimos la respuesta
-	//TODO terminar (texto que se mando en el caso de que haya un draw de cualquier tipo)
+	
 	public String infoMano() {
-		String respuestaMano = " -Best Hand: ";
+		String respuestaMano = " - Best Hand: ";
 		String respuestaFlushDraw="";
 		String respuestaStraightDraw="";
 		
@@ -243,8 +247,12 @@ public class Mano {
 		case 5:
 			respuestaMano += "Flush";
 			break;
-		case 6: //jodienda de hacerlo
-			respuestaMano += "";
+		case 6: 
+			if(mejor_mano.get(0).get_valor() == mejor_mano.get(2).get_valor()) {
+				respuestaMano += mano.get(0).get_nombre_valor() + "´s full of " + mano.get(3).get_nombre_valor() + "s";
+			}else {
+				respuestaMano += mano.get(3).get_nombre_valor() + "´s full of " + mano.get(0).get_nombre_valor() + "s";
+			}
 			break;
 		case 7:
 			respuestaMano += "Poker of "+ mejor_mano.get(0).get_nombre_valor()+"s";
@@ -256,7 +264,7 @@ public class Mano {
 			respuestaMano += "Royal Flush";
 			break;
 		}
-		
+		respuestaMano += " with " + manoString() + "\n";
 		if(flush_draw)
 			respuestaFlushDraw += " - Draw: Flush\n";
 		if(gutshot)
