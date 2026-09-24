@@ -103,15 +103,8 @@ public class Main {
     	                    combinacion.sort(Carta.POR_VALOR_DESC);
     	                    Mano mano = new Mano(combinacion);
 
-    	                    if(mejorMano == null)
+    	                    if(mejorMano == null || mano.compareTo(mejorMano) > 0) {
     	                    	mejorMano = mano;
-    	                    else {
-    	                    	if(mano.mejorManoInt() > mejorMano.mejorManoInt()) {
-    	                    		mejorMano = mano;
-    	                    	}else if(mano.mejorManoInt() == mejorMano.mejorManoInt() && 
-    	                    			mano.getKicker().get_valor() > mejorMano.getKicker().get_valor()) {
-    	                    		mejorMano = mano;
-    	                    	}
     	                    }
     	                }
     	            }
