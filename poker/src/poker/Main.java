@@ -21,6 +21,7 @@ public class Main {
         int opcion = Integer.parseInt(args[0]);
         String ficheroEntrada = args[1];
         String ficheroSalida = args[2];
+        Mano nuestraMano = null;
         
         if(opcion == 1) {
         	try (BufferedReader br = new BufferedReader(new FileReader(ficheroEntrada));
@@ -34,8 +35,7 @@ public class Main {
 	                    char palo = linea.charAt(i + 1);
 	                    mano.add(new Carta("" + valor + palo));
 	                }
-	                mano.sort(Carta.POR_VALOR_DESC);
-	                Mano nuestraMano = new Mano(mano);
+	                nuestraMano = obtenerMejorMano(mano);
 	                System.out.println(nuestraMano.infoMano());
 	                //nuestraMano.infoMano();
 	                pw.print(nuestraMano.infoMano());
@@ -52,7 +52,7 @@ public class Main {
         		while ((linea = br.readLine()) != null) {
 	                ArrayList<Carta> cartas = new ArrayList<Carta>();
 	                int mesa = linea.charAt(5) - '0';
-	                Mano nuestraMano = null;
+	               
 	                for (int i = 0; i < 4; i += 2) {
 	                    char valor = linea.charAt(i);
 	                    char palo = linea.charAt(i + 1);
@@ -63,12 +63,7 @@ public class Main {
 	                    char palo = linea.charAt(i + 1);
 	                    cartas.add(new Carta("" + valor + palo));
 	                }
-	                if(mesa == 3) {
-	                	cartas.sort(Carta.POR_VALOR_DESC);
-	                	nuestraMano = new Mano(cartas);
-	                }else {
-	                	nuestraMano = obtenerMejorMano(cartas);
-	                }
+	                nuestraMano = obtenerMejorMano(cartas);
 	                System.out.println(nuestraMano.infoMano());
                     //nuestraMano.infoMano();
                     pw.print(nuestraMano.infoMano());
@@ -80,7 +75,43 @@ public class Main {
                 System.out.println("Error al leer el fichero: " + e.getMessage());
             }
         }if(opcion == 3) {//TODO hacer
-        	
+        	try (BufferedReader br = new BufferedReader(new FileReader(ficheroEntrada));
+        			PrintWriter pw = new PrintWriter(new FileWriter(ficheroSalida))) {
+        		String linea;
+        		while ((linea = br.readLine()) != null) {
+	        	   ArrayList<Jugador> jugadores = new ArrayList<Jugador>();
+	               ArrayList<Carta> cartas = new ArrayList<Carta>();
+	               int numjugadores = linea.charAt(0) - '0';
+	               for(int i = 2; i < (numjugadores*7)+2; i+=7) {
+	            	   String nombre = "" + linea.charAt(i) + linea.charAt(i+1);
+	            	   for (int j = i+2; j < i+6; j += 2) {
+		                    char valor = linea.charAt(j);
+		                    char palo = linea.charAt(j + 1);
+		                    cartas.add(new Carta("" + valor + palo));
+		                }
+	            	   Jugador a = new Jugador(nombre, cartas);
+	            	   jugadores.add(a);
+	            	   cartas = new ArrayList<Carta>();
+	               }
+	               for (int i = (numjugadores*7)+2; i < linea.length(); i += 2) {
+	                   char valor = linea.charAt(i);
+	                   char palo = linea.charAt(i + 1);
+	                   cartas.add(new Carta("" + valor + palo));
+	               }
+	               for(int i = 0; i < numjugadores;i++) {
+	            	   jugadores.get(i).obtenerMejorMano(new ArrayList<Carta>(cartas));
+	               }
+	               jugadores.sort(null);
+	               for(int i = 0; i < numjugadores;i++) { 
+	            	   pw.print(jugadores.get(i).toString());
+	                   pw.println();
+	                   
+	               }
+	               pw.println();
+        		}
+            } catch (IOException e) {
+                System.out.println("Error al leer el fichero: " + e.getMessage());
+            }
         }
     }
     

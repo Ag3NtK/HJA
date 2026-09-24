@@ -23,7 +23,9 @@ public class Mano implements Comparable<Mano>{
 		detectarDraws();
 		
 	}
-	
+
+
+
 	private void comprobar() {
 		if(esEscaleraReal()) {
 			manita = 9;
@@ -384,6 +386,47 @@ public class Mano implements Comparable<Mano>{
 
 	public int[] getValoresComparacion() {
 		return valoresComparacion;
+	}
+
+	public String getNombreJugada() {
+		String respuestaMano = "";
+		switch (manita) {
+		case 0:
+			respuestaMano += "High Card with " + mejor_mano.get(0).get_nombre_valor();
+			break;
+		case 1:
+			respuestaMano += "Pair of "+ mejor_mano.get(0).get_nombre_valor()+"s";
+			break;
+		case 2:
+			respuestaMano += "Two Pair of "+ mejor_mano.get(0).get_nombre_valor()+"s and "+ mejor_mano.get(2).get_nombre_valor()+"s";
+			break;
+		case 3:
+			respuestaMano += "Three of a kind ("+ mejor_mano.get(0).get_nombre_valor()+"s)";
+			break;
+		case 4:
+			respuestaMano += "Straight";
+			break;
+		case 5:
+			respuestaMano += "Flush";
+			break;
+		case 6: 
+			if(mejor_mano.get(0).get_valor() == mejor_mano.get(2).get_valor()) {
+				respuestaMano += mano.get(0).get_nombre_valor() + "´s full of " + mano.get(3).get_nombre_valor() + "s";
+			}else {
+				respuestaMano += mano.get(3).get_nombre_valor() + "´s full of " + mano.get(0).get_nombre_valor() + "s";
+			}
+			break;
+		case 7:
+			respuestaMano += "Poker of "+ mejor_mano.get(0).get_nombre_valor()+"s";
+			break;
+		case 8:
+			respuestaMano += "Straight Flush";
+			break;
+		case 9:
+			respuestaMano += "Royal Flush";
+			break;
+		}
+		return respuestaMano;
 	}
 	
 }
