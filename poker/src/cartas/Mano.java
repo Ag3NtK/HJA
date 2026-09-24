@@ -20,6 +20,7 @@ public class Mano implements Comparable<Mano>{
 		flush_draw = false;
 		open_ended = false;
 		comprobar();
+		detectarDraws();
 		
 	}
 	
@@ -45,7 +46,10 @@ public class Mano implements Comparable<Mano>{
 		}
 		if(manita == -1 && esColor()) {
 			manita = 5;
-			valoresComparacion = new int[]{mano.get(i).get_valor()};
+			valoresComparacion = new int[5];
+			for(int i = 0; i < 5; i++) {
+				valoresComparacion[i] = mano.get(i).get_valor();
+			}
 			return;
 		}
 		if(manita == -1 && esEscalera()) {
@@ -76,56 +80,95 @@ public class Mano implements Comparable<Mano>{
 		}
 	}
 
+	
 	private boolean esColor() {
-		ArrayList<Integer> lista = new ArrayList<>(Arrays.asList(0, 0, 0, 0));
+		int[] contadorPalos = new int[4];
 		for(int i = 0; i < 5; i++) {
-			int aux = lista.get(mano.get(i).get_palo());
-			aux++;
-			lista.set(mano.get(i).get_palo(), aux);
+			contadorPalos[mano.get(i).get_palo()]++;
 		}
 		int color = 0;
-		for(int i = 0; i < 4; i++) {
-			if(lista.get(i)>color) {
-				color = lista.get(i);
-			}
+		for(int c : contadorPalos) {
+			if(c > color) color = c;
 		}
 		if(color == 5) {
 			mejor_mano = mano;
 			return true;
 		}
-		else {
-			if(color == 4)
-				flush_draw = true;
-			return false;
-		}
+		return false;
 	}
-	//TODO en el caso de AhAd7c4s2h devuelve gutshot cuando no lo es
-	// con AhAdAc7s2h da open_ended
-	private boolean esEscalera(){
-		int escalera = 0;
-		int gutshot = 0;
-		for(int i = 0; i < 4; i++) {
-			if(mano.get(i).get_valor() == mano.get(i+1).get_valor()+1) { //caso base
-				escalera++;
-			}else if(mano.get(i).get_valor() == 14 && mano.get(4).get_valor() == 2) {
-				escalera++;
-			}
-			else if(mano.get(i).get_valor() == mano.get(i+1).get_valor()+2) {
-				++escalera;
-				++gutshot;
-			}
+
+	
+	private boolean esEscalera() {
+		TreeSet<Integer> valoresUnicos = new TreeSet<>();
+		for(int i = 0; i < 5; i++) {
+			valoresUnicos.add(mano.get(i).get_valor());
 		}
-		if(escalera == 4&& gutshot==0) {
+		
+		if(valoresUnicos.size() < 5) return false;
+
+		int top = valoresUnicos.last();
+		int low = valoresUnicos.first();
+
+		if(top - low == 4) {
 			mejor_mano = mano;
 			return true;
 		}
-		if(escalera >= 3 && gutshot == 1) {
-			this.gutshot = true;
-		}
-		else if(escalera == 3&& gutshot==0) {
-			open_ended = true;
+		
+		if(valoresUnicos.containsAll(Arrays.asList(14, 2, 3, 4, 5))) {
+			mejor_mano = mano;
+			return true;
 		}
 		return false;
+	}
+
+
+	private void detectarDraws() {
+		// Flush draw
+		int[] contadorPalos = new int[4];
+		for(int i = 0; i < mano.size(); i++) {
+			contadorPalos[mano.get(i).get_palo()]++;
+		}
+		for(int c : contadorPalos) {
+			if(c == 4) {
+				flush_draw = true;
+				break;
+			}
+		}
+
+		TreeSet<Integer> valoresUnicos = new TreeSet<>();
+		for(int i = 0; i < mano.size(); i++) {
+			valoresUnicos.add(mano.get(i).get_valor());
+		}
+		
+		if(valoresUnicos.contains(14)) {
+			valoresUnicos.add(1);
+		}
+
+		boolean hayGutshot = false;
+		boolean hayOpenEnded = false;
+
+		
+		for(int low = 1; low <= 10; low++) {
+			int cuenta = 0;
+			int posFaltante = -1;
+			for(int pos = 0; pos < 5; pos++) {
+				if(valoresUnicos.contains(low + pos)) {
+					cuenta++;
+				} else {
+					posFaltante = pos;
+				}
+			}
+			if(cuenta == 4) {
+				if(posFaltante == 0 || posFaltante == 4) {
+					hayOpenEnded = true;
+				} else {
+					hayGutshot = true;
+				}
+			}
+		}
+
+		this.gutshot = hayGutshot;
+		this.open_ended = hayOpenEnded;
 	}
 	
 	private boolean esPoker(){ 
