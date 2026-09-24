@@ -1,11 +1,11 @@
 package cartas;
 import java.util.*;
 
-public class Mano {
+public class Mano implements Comparable<Mano>{
 	private ArrayList<Carta> mano; //mano dada
 	private ArrayList<Carta> mejor_mano; //cartas que conforman la mejor mano
 	private int manita; //valor numerico de la mejor mano
-	private Carta kicker; //(TODO añadirlo a todas las comprobaciones necesarias) carta más alta para solucionar empates 
+	private int[] valoresComparacion; //valores para desempate ordenados por importancia
 	private boolean gutshot; //te falta una carta en el medio de la escalera
 	private boolean open_ended; //te falta una carta en los extremos de la escalera
 	private boolean flush_draw; //te falta una carta para el color
@@ -15,6 +15,7 @@ public class Mano {
 		mano=cartitas; //ordenar aqui las cartas o antes de mandarlo?
 		mejor_mano = new ArrayList<Carta>();
 		manita = -1;
+		valoresComparacion = new int[0];
 		gutshot = false;
 		flush_draw = false;
 		open_ended = false;
@@ -25,10 +26,13 @@ public class Mano {
 	private void comprobar() {
 		if(esEscaleraReal()) {
 			manita = 9;
+			valoresComparacion = new int[]{14};
 			return;
 		}
 		if(manita == -1 && esEscaleraColor()) {
 			manita = 8;
+			boolean tieneAs = mano.get(0).get_valor() == 14 && mano.get(4).get_valor() == 2;
+			valoresComparacion = new int[]{tieneAs ? 5 : mano.get(0).get_valor()};
 			return;
 		}
 		if(manita == -1 && esPoker()) {
@@ -41,10 +45,13 @@ public class Mano {
 		}
 		if(manita == -1 && esColor()) {
 			manita = 5;
+			valoresComparacion = new int[]{mano.get(i).get_valor()};
 			return;
 		}
 		if(manita == -1 && esEscalera()) {
 			manita=4;
+			boolean tieneAs = mano.get(0).get_valor() == 14 && mano.get(4).get_valor() == 2;
+			valoresComparacion = new int[]{tieneAs ? 5 : mano.get(0).get_valor()};
 			return;
 		}
 		if(manita == -1 && esTrio()) {
@@ -62,6 +69,10 @@ public class Mano {
 		if(manita == -1) {
 			mejor_mano.add(mano.get(0));
 			manita = 0;
+			valoresComparacion = new int[5];
+			for(int i = 0; i < 5; i++) {
+				valoresComparacion[i] = mano.get(i).get_valor();
+			}
 		}
 	}
 
@@ -124,6 +135,7 @@ public class Mano {
 			for(int i = 0; i <= 3; i++) {
 				mejor_mano.add(mano.get(i));
 			}
+			valoresComparacion = new int[]{mano.get(0).get_valor(), mano.get(4).get_valor()};
 			return true;
 		}
 		if(mano.get(1).get_valor() == mano.get(2).get_valor() &&
@@ -132,6 +144,7 @@ public class Mano {
 			for(int i = 1; i <= 4; i++) {
 				mejor_mano.add(mano.get(i));
 			}
+			valoresComparacion = new int[]{mano.get(1).get_valor(), mano.get(0).get_valor()};
 			return true;
 		}
 		return false;
@@ -142,12 +155,14 @@ public class Mano {
 		   mano.get(0).get_valor() == mano.get(2).get_valor() &&
 		   mano.get(3).get_valor() == mano.get(4).get_valor()) {
 			mejor_mano = mano;
+			valoresComparacion = new int[]{mano.get(0).get_valor(), mano.get(3).get_valor()};
 			return true;
 		}
 		if(mano.get(0).get_valor() == mano.get(1).get_valor() &&
 		   mano.get(2).get_valor() == mano.get(3).get_valor() &&
 		   mano.get(2).get_valor() == mano.get(4).get_valor()) {
 			mejor_mano = mano;
+			valoresComparacion = new int[]{mano.get(2).get_valor(), mano.get(0).get_valor()};
 			return true;
 		}
 		return false;
@@ -159,6 +174,13 @@ public class Mano {
 				mejor_mano.add(mano.get(i));
 				mejor_mano.add(mano.get(i+1));
 				mejor_mano.add(mano.get(i+2));
+				ArrayList<Integer> kickers = new ArrayList<>();
+				for(int j = 0; j < 5; j++) {
+					if(j < i || j > i+2) {
+						kickers.add(mano.get(j).get_valor());
+					}
+				}
+				valoresComparacion = new int[]{mano.get(i).get_valor(), kickers.get(0), kickers.get(1)};
 				return true;
 			}
 		}
@@ -174,6 +196,13 @@ public class Mano {
 						mejor_mano.add(mano.get(i+1));
 						mejor_mano.add(mano.get(j));
 						mejor_mano.add(mano.get(j+1));
+						int kicker = -1;
+						for(int k = 0; k < 5; k++) {
+							if(k != i && k != i+1 && k != j && k != j+1) {
+								kicker = mano.get(k).get_valor();
+							}
+						}
+						valoresComparacion = new int[]{mano.get(i).get_valor(), mano.get(j).get_valor(), kicker};
 						return true;
 					}
 				}
@@ -187,6 +216,13 @@ public class Mano {
 			if(mano.get(i).get_valor() == mano.get(i+1).get_valor()) {
 				mejor_mano.add(mano.get(i));
 				mejor_mano.add(mano.get(i+1));
+				ArrayList<Integer> kickers = new ArrayList<>();
+				for(int j = 0; j < 5; j++) {
+					if(j != i && j != i+1) {
+						kickers.add(mano.get(j).get_valor());
+					}
+				}
+				valoresComparacion = new int[]{mano.get(i).get_valor(), kickers.get(0), kickers.get(1), kickers.get(2)};
 				return true;
 			}
 		}
@@ -273,7 +309,8 @@ public class Mano {
 			respuestaStraightDraw += " - Draw: Straight Open_Ended\n";
 		return respuestaMano + respuestaStraightDraw + respuestaFlushDraw;
 	}
-	
+
+
  	public boolean esGutshot() {
 		return gutshot;
 	}
@@ -285,9 +322,25 @@ public class Mano {
 	public boolean esFlushDraw() {
 		return flush_draw;
 	}
-	//
-	public Carta getKicker() {
-		return kicker;
+	/**
+	 * Compara esta mano con otra. Devuelve positivo si esta es mejor,
+	 * negativo si es peor, 0 si empatan.
+	 * Primero compara por categoria (manita), luego por valoresComparacion.
+	 */
+	@Override
+	public int compareTo(Mano otra) {
+		int cmp = Integer.compare(this.manita, otra.manita);
+		if(cmp != 0) return cmp;
+		int len = Math.min(this.valoresComparacion.length, otra.valoresComparacion.length);
+		for(int i = 0; i < len; i++) {
+			cmp = Integer.compare(this.valoresComparacion[i], otra.valoresComparacion[i]);
+			if(cmp != 0) return cmp;
+		}
+		return 0;
+	}
+
+	public int[] getValoresComparacion() {
+		return valoresComparacion;
 	}
 	
 }
