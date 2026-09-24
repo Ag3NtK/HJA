@@ -74,7 +74,7 @@ public class Main {
             } catch (IOException e) {
                 System.out.println("Error al leer el fichero: " + e.getMessage());
             }
-        }if(opcion == 3) {//TODO hacer
+        }if(opcion == 3) {
         	try (BufferedReader br = new BufferedReader(new FileReader(ficheroEntrada));
         			PrintWriter pw = new PrintWriter(new FileWriter(ficheroSalida))) {
         		String linea;
@@ -108,6 +108,35 @@ public class Main {
 	                   
 	               }
 	               pw.println();
+        		}
+            } catch (IOException e) {
+                System.out.println("Error al leer el fichero: " + e.getMessage());
+            }
+        }
+        if(opcion == 4) {
+        	try (BufferedReader br = new BufferedReader(new FileReader(ficheroEntrada));
+        			PrintWriter pw = new PrintWriter(new FileWriter(ficheroSalida))) {
+        		String linea;
+        		while ((linea = br.readLine()) != null) {
+	               ArrayList<Carta> cartas = new ArrayList<Carta>();
+	               ArrayList<Carta> mano = new ArrayList<Carta>();
+	                
+	                for (int i = 0; i < 8; i += 2) {
+	                    char valor = linea.charAt(i);
+	                    char palo = linea.charAt(i + 1);
+	                    mano.add(new Carta("" + valor + palo));
+	                }
+	                //int numCartas = linea.charAt(9) - '0';
+	                for (int i = 11; i < linea.length(); i += 2) {
+	                    char valor = linea.charAt(i);
+	                    char palo = linea.charAt(i + 1);
+	                    cartas.add(new Carta("" + valor + palo));
+	                }
+	                
+	                Jugador aux =  new Jugador("hola", mano);
+	                Mano mejorMano = aux.evaluarOmaha(cartas);
+	                pw.print(mejorMano.infoMano());
+	                pw.println();
         		}
             } catch (IOException e) {
                 System.out.println("Error al leer el fichero: " + e.getMessage());
