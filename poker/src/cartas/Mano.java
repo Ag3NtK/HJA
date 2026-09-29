@@ -161,6 +161,8 @@ public class Mano implements Comparable<Mano>{
 				}
 			}
 			if(cuenta == 4) {
+//	TODO Si la definición de open ended es que se puede completar la escalera por arriba y por abajo, 
+//       hay que cambiar el || por un &&
 				if(posFaltante == 0 || posFaltante == 4) {
 					hayOpenEnded = true;
 				} else {
