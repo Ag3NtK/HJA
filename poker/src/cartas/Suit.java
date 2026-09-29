@@ -4,7 +4,7 @@ public enum Suit {
 	HEARTS(0, 'h'),
 	DIAMONDS(1, 'd'),
 	CLUBS(2, 'c'),
-	SPADES(3, 's');	//	Color (b)lack y (r)ed
+	SPADES(3, 's');
 
 	private final int valor;
 	private final char symbol;
@@ -32,6 +32,3 @@ public enum Suit {
 		return valor;
 	}
 }
-
-
-

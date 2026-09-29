@@ -14,7 +14,7 @@ public class Main {
     public static void main(String[] args) {
 
         if (args.length != 3) {
-            System.out.println("Uso: java -jar nombreProyecto.jar <opcion> <entrada> <salida>");
+            System.out.println("Numero de argumentos incorrecto");
             return;
         }
 
@@ -36,8 +36,6 @@ public class Main {
 	                    mano.add(new Carta("" + valor + palo));
 	                }
 	                nuestraMano = obtenerMejorMano(mano);
-	                System.out.println(nuestraMano.infoMano());
-	                //nuestraMano.infoMano();
 	                pw.print(nuestraMano.infoMano());
 	                pw.println();
         		}
@@ -45,13 +43,13 @@ public class Main {
             } catch (IOException e) {
                 System.out.println("Error al leer el fichero: " + e.getMessage());
             }
-        }if(opcion == 2) { //TODO todavia sin acabar
+        }if(opcion == 2) {
         	try (BufferedReader br = new BufferedReader(new FileReader(ficheroEntrada));
         			PrintWriter pw = new PrintWriter(new FileWriter(ficheroSalida))) {
         		String linea;
         		while ((linea = br.readLine()) != null) {
 	                ArrayList<Carta> cartas = new ArrayList<Carta>();
-	                int mesa = linea.charAt(5) - '0';
+	                //int mesa = linea.charAt(5) - '0';
 	               
 	                for (int i = 0; i < 4; i += 2) {
 	                    char valor = linea.charAt(i);
@@ -64,8 +62,6 @@ public class Main {
 	                    cartas.add(new Carta("" + valor + palo));
 	                }
 	                nuestraMano = obtenerMejorMano(cartas);
-	                System.out.println(nuestraMano.infoMano());
-                    //nuestraMano.infoMano();
                     pw.print(nuestraMano.infoMano());
                     pw.println();
         		}

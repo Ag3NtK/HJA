@@ -12,7 +12,7 @@ public class Mano implements Comparable<Mano>{
 
 	public Mano(ArrayList<Carta> cartitas) {
 		
-		mano=cartitas; //ordenar aqui las cartas o antes de mandarlo?
+		mano=cartitas;
 		mejor_mano = new ArrayList<Carta>();
 		manita = -1;
 		valoresComparacion = new int[0];
@@ -82,7 +82,6 @@ public class Mano implements Comparable<Mano>{
 		}
 	}
 
-	
 	private boolean esColor() {
 		int[] contadorPalos = new int[4];
 		for(int i = 0; i < 5; i++) {
@@ -98,7 +97,6 @@ public class Mano implements Comparable<Mano>{
 		}
 		return false;
 	}
-
 	
 	private boolean esEscalera() {
 		TreeSet<Integer> valoresUnicos = new TreeSet<>();
@@ -122,7 +120,6 @@ public class Mano implements Comparable<Mano>{
 		}
 		return false;
 	}
-
 
 	private void detectarDraws() {
 		// Flush draw
@@ -291,6 +288,7 @@ public class Mano implements Comparable<Mano>{
 		}
 		return respuesta;
 	}
+	
 	public String manoString() {
 		String respuesta = "";
 		for(int i = 0; i < mano.size(); i++) {
@@ -298,6 +296,7 @@ public class Mano implements Comparable<Mano>{
 		}
 		return respuesta;
 	}
+	
 	public int mejorManoInt() {
 		return manita;
 	}
@@ -356,7 +355,6 @@ public class Mano implements Comparable<Mano>{
 			respuestaStraightDraw += " - Draw: Straight Open_Ended\n";
 		return respuestaMano + respuestaStraightDraw + respuestaFlushDraw;
 	}
-
 
  	public boolean esGutshot() {
 		return gutshot;

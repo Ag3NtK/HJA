@@ -10,7 +10,8 @@ public class Carta {
 	public Carta(String carta) {
 		valor = Rank.fromSymbol(carta.charAt(0));
 		palo = Suit.fromSymbol(carta.charAt(1));		
-	}	
+	}
+	
 	public static final Comparator<Carta> POR_VALOR_DESC = 
 	        Comparator.comparingInt(Carta::get_valor).reversed();
 	
@@ -21,7 +22,6 @@ public class Carta {
 	public int get_valor() {
 		return valor.getValue();
 	}
-	//
 	
 	public String get_carta_String() {
 		return "" + valor.getSymbol() + palo.getSymbol();

@@ -31,7 +31,6 @@ public enum Rank {
         return value;
     }
 
-
     public static Rank fromSymbol(char symbol) {
         char upperSymbol = Character.toUpperCase(symbol);
         for (Rank rank : Rank.values()) {
