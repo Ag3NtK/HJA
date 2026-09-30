@@ -84,7 +84,7 @@ public class Mano implements Comparable<Mano>{
 			}
 		}
 	}
-	// solo tenemos que mirar si hay más de un color, sirve con hacer un bucle que guarde el color de la primera carta y mire si el resto son iguales
+	// TODO solo tenemos que mirar si hay más de un color, sirve con hacer un bucle que guarde el color de la primera carta y mire si el resto son iguales
 	private boolean esColor() {
 		int[] contadorPalos = new int[4];
 		for(int i = 0; i < 5; i++) {
@@ -161,6 +161,7 @@ public class Mano implements Comparable<Mano>{
 				}
 			}
 			if(cuenta == 4) {
+				// TODO
 				// Si falta la carta de un extremo (posición 0 o 4), normalmente es un Open Ended
 				// porque la escalera de 4 cartas se puede completar por ambos lados.
 				// EXCEPCIÓN: Si estamos en los límites con el As (A-2-3-4 o J-Q-K-A), 
@@ -176,7 +177,7 @@ public class Mano implements Comparable<Mano>{
 		this.gutshot = hayGutshot;
 		this.open_ended = hayOpenEnded;
 	}
-	
+	// TODO
 	// Si la 1º y la 4º carta son iguales, hay poker
 	// Si la 2º y la 5º carta son iguales, hay poker
 	private boolean esPoker(){ 
@@ -200,7 +201,7 @@ public class Mano implements Comparable<Mano>{
 		}
 		return false;
 	}
-
+	// TODO Lo mismo que en poker
 	private boolean esFull() {
 		if(mano.get(0).get_valor() == mano.get(1).get_valor() &&
 		   mano.get(0).get_valor() == mano.get(2).get_valor() &&
