@@ -25,7 +25,10 @@ public class Mano implements Comparable<Mano>{
 	}
 
 
-
+	//	TODO cambiar el orden y que se compruebe si es escalera primero.
+	//	En el caso de ser escalera, se mira si tmb es de color
+	//	En el caso de ser de color se mira tmb si es Real
+	//	De esta forma nos ahorramos muchas llamadas a funciones
 	private void comprobar() {
 		if(esEscaleraReal()) {
 			manita = 9;
@@ -174,6 +177,8 @@ public class Mano implements Comparable<Mano>{
 		this.open_ended = hayOpenEnded;
 	}
 	
+	// Si la 1º y la 4º carta son iguales, hay poker
+	// Si la 2º y la 5º carta son iguales, hay poker
 	private boolean esPoker(){ 
 		if(mano.get(0).get_valor() == mano.get(1).get_valor() &&
 		   mano.get(0).get_valor() == mano.get(2).get_valor() &&
