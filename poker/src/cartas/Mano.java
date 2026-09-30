@@ -158,8 +158,10 @@ public class Mano implements Comparable<Mano>{
 				}
 			}
 			if(cuenta == 4) {
-//	TODO Si la definición de open ended es que se puede completar la escalera por arriba y por abajo, 
-//       hay que cambiar el || por un &&
+				// Si falta la carta de un extremo (posición 0 o 4), normalmente es un Open Ended
+				// porque la escalera de 4 cartas se puede completar por ambos lados.
+				// EXCEPCIÓN: Si estamos en los límites con el As (A-2-3-4 o J-Q-K-A), 
+				// solo se puede completar por un lado (no da la vuelta), por lo que se considera Gutshot.
 				if(posFaltante == 0 || posFaltante == 4) {
 					hayOpenEnded = true;
 				} else {
