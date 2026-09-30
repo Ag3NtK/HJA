@@ -81,7 +81,7 @@ public class Mano implements Comparable<Mano>{
 			}
 		}
 	}
-
+	// solo tenemos que mirar si hay más de un color, sirve con hacer un bucle que guarde el color de la primera carta y mire si el resto son iguales
 	private boolean esColor() {
 		int[] contadorPalos = new int[4];
 		for(int i = 0; i < 5; i++) {
