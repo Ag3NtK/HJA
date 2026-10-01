@@ -84,21 +84,18 @@ public class Mano implements Comparable<Mano>{
 			}
 		}
 	}
-	// TODO solo tenemos que mirar si hay más de un color, sirve con hacer un bucle que guarde el color de la primera carta y mire si el resto son iguales
 	private boolean esColor() {
-		int[] contadorPalos = new int[4];
-		for(int i = 0; i < 5; i++) {
-			contadorPalos[mano.get(i).get_palo()]++;
+		
+		int contador=1;
+		while(contador<4&&mano.get(contador).get_palo()==mano.get(contador+1).get_palo()) {
+			contador++;
 		}
-		int color = 0;
-		for(int c : contadorPalos) {
-			if(c > color) color = c;
-		}
-		if(color == 5) {
+		if(contador==5) {
 			mejor_mano = mano;
 			return true;
 		}
-		return false;
+		else
+			return false;
 	}
 	
 	private boolean esEscalera() {

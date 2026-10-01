@@ -79,7 +79,8 @@ public class Jugador implements Comparable<Jugador> {
                             combo5.add(cartasComunes.get(x));
                             combo5.add(cartasComunes.get(y));
                             combo5.add(cartasComunes.get(z));
-
+                            combo5.sort(Carta.POR_VALOR_DESC);
+                            
                             Mano manoActual = new Mano(combo5);
 
                             if (mejorMano == null || manoActual.compareTo(mejorMano) > 0) {
