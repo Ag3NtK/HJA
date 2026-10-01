@@ -87,7 +87,7 @@ public class Mano implements Comparable<Mano>{
 	private boolean esColor() {
 		
 		int contador=1;
-		while(contador<4&&mano.get(contador).get_palo()==mano.get(contador+1).get_palo()) {
+		while(contador<5&&mano.get(contador).get_palo()==mano.get(contador-1).get_palo()) {
 			contador++;
 		}
 		if(contador==5) {
