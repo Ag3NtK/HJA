@@ -1,0 +1,48 @@
+package cartas;
+
+import java.util.*;
+public class RangoParser {
+
+
+
+    public enum TipoMano {
+        PAIR,      // AA, KK, etc.
+        SUITED,    // AKs, T9s, etc.
+        OFFSUITED  // AKo, T9o, etc.
+    }
+
+     public static class ManoInicial {
+        public final char valorAlto;  // Carta más alta (A, K...2)
+        public final char valorBajo;  // Carta más baja
+        public final TipoMano tipo;
+        
+        public ManoInicial(char valorAlto, char valorBajo, TipoMano tipo) {
+            // Aseguramos que valorAlto >= valorBajo
+            int idxAlto = VALORES.indexOf(Character.toUpperCase(valorAlto));
+            int idxBajo = VALORES.indexOf(Character.toUpperCase(valorBajo));
+            if (idxAlto > idxBajo) {
+                // Intercambiar (indices menores = valores más altos)
+                this.valorAlto = Character.toUpperCase(valorBajo);
+                this.valorBajo = Character.toUpperCase(valorAlto);
+            } else {
+                this.valorAlto = Character.toUpperCase(valorAlto);
+                this.valorBajo = Character.toUpperCase(valorBajo);
+            }
+            this.tipo = (this.valorAlto == this.valorBajo) ? TipoMano.PAIR : tipo;
+          }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
