@@ -27,6 +27,10 @@ public class Carta {
 		return "" + valor.getSymbol() + palo.getSymbol();
 	}
 	
+	public String get_carta_PNG() {
+        return "" + valor + palo + ".png";
+    }
+	
 	public String get_nombre_valor() {
 		switch (this.valor.getSymbol()) {
 	    case 'A':

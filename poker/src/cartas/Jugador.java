@@ -7,6 +7,7 @@ public class Jugador implements Comparable<Jugador> {
     private String id;
     private ArrayList<Carta> cartasPropias;
     private Mano mejorMano;
+    private Double Equity;
 
     public Jugador(String id, ArrayList<Carta> cartasPropias) {
         this.id = id;
@@ -20,7 +21,13 @@ public class Jugador implements Comparable<Jugador> {
     public Mano getMejorMano() {
         return mejorMano;
     }
-
+    
+    public void addCarta(Carta carta) {
+    	if(cartasPropias.size() < 2) {
+    		cartasPropias.add(carta);
+    	}
+    }
+    
     @Override
     public int compareTo(Jugador otro) {
         return otro.mejorMano.compareTo(this.mejorMano);
@@ -31,7 +38,15 @@ public class Jugador implements Comparable<Jugador> {
         return id + ": " + mejorMano.manoString() + " (" + mejorMano.getNombreJugada() + ")";
     }
     
-    public void obtenerMejorMano(ArrayList<Carta> cartas) {
+    public Double getEquity() {
+		return Equity;
+	}
+
+	public void setEquity(Double equity) {
+		Equity = equity;
+	}
+
+	public void obtenerMejorMano(ArrayList<Carta> cartas) {
     	this.mejorMano = null;
     	cartas.addAll(cartasPropias);
     	for (int i = 0; i < cartas.size() - 4; i++) {
