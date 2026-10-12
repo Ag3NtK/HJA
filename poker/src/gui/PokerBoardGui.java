@@ -16,10 +16,11 @@ public class PokerBoardGui extends JFrame {
 
     private final PlayerPanel[] jugadores = new PlayerPanel[6];
     private final JLabel[] cartasComunitarias = new JLabel[5];
-    private ArrayList<Carta> cartasComunes = new ArrayList<Carta>();
-    private Baraja baraja = new Baraja();
     
     //
+    private boolean repartoManual = false;
+    private ArrayList<Carta> cartasComunes = new ArrayList<Carta>();
+    private Baraja baraja = new Baraja();
     private JCheckBox modoTexto;
     private JCheckBox modoPorcentaje;
 
@@ -149,17 +150,49 @@ public class PokerBoardGui extends JFrame {
         setMinimumSize(new Dimension(1200, 750));
 
         // Controles inferiores.
-        JButton botonRepartir = new JButton("Repartir Random");
+        JButton botonRepartirManual = new JButton("Repartir Manual");
+        JButton botonRepartirRandom = new JButton("Repartir Random");
         JButton botonReiniciar = new JButton("Reiniciar");
+        JButton botonFlop = new JButton("Flop");
+        JButton botonTurn = new JButton("Turn");
+        JButton botonRiver = new JButton("River");
 
-        botonRepartir.addActionListener(e -> repartirRandom());
-        botonReiniciar.addActionListener(e -> reiniciar());
+        botonRepartirManual.addActionListener(e -> {repartirManual();
+        											botonFlop.setEnabled(true);
+        											botonRepartirManual.setEnabled(false);
+        											botonRepartirRandom.setEnabled(false);});
+        botonRepartirRandom.addActionListener(e -> {repartirRandom();
+        									  		botonFlop.setEnabled(true);
+        									  		botonRepartirRandom.setEnabled(false);
+        									  		botonRepartirManual.setEnabled(false);});
+        botonFlop.addActionListener(e -> {flop();
+        								  botonTurn.setEnabled(true);
+        								  botonFlop.setEnabled(false);});
+        botonTurn.addActionListener(e -> {turn();
+        								  botonRiver.setEnabled(true);
+        								  botonTurn.setEnabled(false);});
+        botonRiver.addActionListener(e -> {river();
+        								   botonRiver.setEnabled(false);});
+        botonReiniciar.addActionListener(e -> {reiniciar();
+        									   botonRepartirRandom.setEnabled(true);
+        									   botonRepartirManual.setEnabled(true);
+        									   botonFlop.setEnabled(false);
+        									   botonTurn.setEnabled(false);
+        									   botonRiver.setEnabled(false);});
+        
+        botonFlop.setEnabled(false);
+        botonTurn.setEnabled(false);
+        botonRiver.setEnabled(false);
 
         JPanel controles = new JPanel(
             new FlowLayout(FlowLayout.CENTER, 20, 12)
         );
-
-        controles.add(botonRepartir);
+        
+        controles.add(botonRepartirManual);
+        controles.add(botonRepartirRandom);
+        controles.add(botonFlop);
+        controles.add(botonTurn);
+        controles.add(botonRiver);
         controles.add(botonReiniciar);
         controles.add(mensaje);
 
@@ -203,7 +236,23 @@ public class PokerBoardGui extends JFrame {
         label.setBorder(null);
         label.setIcon(new ImageIcon(imagen));
     }
+    //TODO cambiar la funcion para repartirlo manualmente
+    private void repartirManual() {
+    	repartoManual = true;
+    	for (int ronda = 0; ronda < 2; ronda++) {
+            for (PlayerPanel jugador : jugadores) {
+                Carta carta = baraja.repartir();
+                jugador.mostrarCarta(ronda, carta);
+            }
+        }
+    	
+    	for (PlayerPanel jugador : jugadores) {
+            jugador.setEquity(null);
+        }
 
+        mensaje.setText("Manos repartidas correctamente");
+    }
+    
     private void repartirRandom() {
     	baraja.barajar();
         // Repartir dos cartas a cada uno de los seis jugadores.
@@ -216,7 +265,7 @@ public class PokerBoardGui extends JFrame {
         }
 
         // Repartir las cinco cartas comunitarias.
-        for (int i = 0; i < cartasComunitarias.length; i++) {
+        /*for (int i = 0; i < cartasComunitarias.length; i++) {
             Carta carta = baraja.repartir();
             //
             cartasComunes.add(carta);
@@ -225,14 +274,71 @@ public class PokerBoardGui extends JFrame {
                 cartasComunitarias[i],
                 carta.get_carta_PNG()
             );
-        }
+        }*/
 
         // El equity queda pendiente de calcular.
         for (PlayerPanel jugador : jugadores) {
             jugador.setEquity(null);
         }
 
-        mensaje.setText("Mano repartida correctamente");
+        mensaje.setText("Manos repartidas correctamente");
+    }
+
+    private void flop() {
+    	if(!repartoManual)
+	    	for (int i = 0; i < 3; i++) {
+	            Carta carta = baraja.repartir();
+	            //
+	            cartasComunes.add(carta);
+	            //
+	            mostrarImagen(
+	                cartasComunitarias[i],
+	                carta.get_carta_PNG()
+	            );
+	        }
+    	else {
+    		
+    	}
+    	
+    	mensaje.setText("Flop repartido correctamente");
+    }
+    
+    private void turn() {
+    	if(!repartoManual)
+	    	for (int i = 3; i < 4; i++) {
+	            Carta carta = baraja.repartir();
+	            //
+	            cartasComunes.add(carta);
+	            //
+	            mostrarImagen(
+	                cartasComunitarias[i],
+	                carta.get_carta_PNG()
+	            );
+	        }
+    	else {
+    		
+    	}
+    	
+    	mensaje.setText("Turn repartido correctamente");
+    }
+    
+    private void river() {
+    	if(!repartoManual)
+	    	for (int i = 4; i < cartasComunitarias.length; i++) {
+	            Carta carta = baraja.repartir();
+	            //
+	            cartasComunes.add(carta);
+	            //
+	            mostrarImagen(
+	                cartasComunitarias[i],
+	                carta.get_carta_PNG()
+	            );
+	        }
+    	else {
+    		
+    	}
+    	
+    	mensaje.setText("River repartido correctamente");
     }
 
     private void reiniciar() {
@@ -248,6 +354,7 @@ public class PokerBoardGui extends JFrame {
         }
         
         cartasComunes = new ArrayList<Carta>();
+        repartoManual = false;
         
         mensaje.setText("Pulsa Repartir para comenzar");
     }
