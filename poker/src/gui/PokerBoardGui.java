@@ -18,6 +18,12 @@ public class PokerBoardGui extends JFrame {
     private final JLabel[] cartasComunitarias = new JLabel[5];
     
     //
+    private JButton botonRepartirManual;
+    private JButton botonRepartirRandom;
+    private JButton botonReiniciar;
+    private JButton botonFlop;
+    private JButton botonTurn;
+    private JButton botonRiver;
     private boolean repartoManual = false;
     private ArrayList<Carta> cartasComunes = new ArrayList<Carta>();
     private Baraja baraja = new Baraja();
@@ -150,29 +156,30 @@ public class PokerBoardGui extends JFrame {
         setMinimumSize(new Dimension(1200, 750));
 
         // Controles inferiores.
-        JButton botonRepartirManual = new JButton("Repartir Manual");
-        JButton botonRepartirRandom = new JButton("Repartir Random");
-        JButton botonReiniciar = new JButton("Reiniciar");
-        JButton botonFlop = new JButton("Flop");
-        JButton botonTurn = new JButton("Turn");
-        JButton botonRiver = new JButton("River");
+        botonRepartirManual = new JButton("Repartir Manual");
+        botonRepartirRandom = new JButton("Repartir Random");
+        botonReiniciar = new JButton("Reiniciar");
+        botonFlop = new JButton("Flop");
+        botonTurn = new JButton("Turn");
+        botonRiver = new JButton("River");
 
-        botonRepartirManual.addActionListener(e -> {repartirManual();
+        botonRepartirManual.addActionListener(e -> {repartoManual = true;
         											botonFlop.setEnabled(true);
         											botonRepartirManual.setEnabled(false);
-        											botonRepartirRandom.setEnabled(false);});
-        botonRepartirRandom.addActionListener(e -> {repartirRandom();
-        									  		botonFlop.setEnabled(true);
+        											botonRepartirRandom.setEnabled(false);
+        											repartirCartas();});
+        botonRepartirRandom.addActionListener(e -> {botonFlop.setEnabled(true);
         									  		botonRepartirRandom.setEnabled(false);
-        									  		botonRepartirManual.setEnabled(false);});
-        botonFlop.addActionListener(e -> {flop();
-        								  botonTurn.setEnabled(true);
-        								  botonFlop.setEnabled(false);});
-        botonTurn.addActionListener(e -> {turn();
-        								  botonRiver.setEnabled(true);
-        								  botonTurn.setEnabled(false);});
-        botonRiver.addActionListener(e -> {river();
-        								   botonRiver.setEnabled(false);});
+        									  		botonRepartirManual.setEnabled(false);
+        									  		repartirCartas();});
+        botonFlop.addActionListener(e -> {botonTurn.setEnabled(true);
+        								  botonFlop.setEnabled(false);
+        								  flop();});
+        botonTurn.addActionListener(e -> {botonRiver.setEnabled(true);
+        								  botonTurn.setEnabled(false);
+        								  turn();});
+        botonRiver.addActionListener(e -> {botonRiver.setEnabled(false);
+        								   river();});
         botonReiniciar.addActionListener(e -> {reiniciar();
         									   botonRepartirRandom.setEnabled(true);
         									   botonRepartirManual.setEnabled(true);
@@ -236,51 +243,73 @@ public class PokerBoardGui extends JFrame {
         label.setBorder(null);
         label.setIcon(new ImageIcon(imagen));
     }
-    //TODO cambiar la funcion para repartirlo manualmente
-    private void repartirManual() {
-    	repartoManual = true;
-    	for (int ronda = 0; ronda < 2; ronda++) {
-            for (PlayerPanel jugador : jugadores) {
-                Carta carta = baraja.repartir();
-                jugador.mostrarCarta(ronda, carta);
-            }
-        }
-    	
-    	for (PlayerPanel jugador : jugadores) {
-            jugador.setEquity(null);
-        }
-
-        mensaje.setText("Manos repartidas correctamente");
-    }
     
-    private void repartirRandom() {
-    	baraja.barajar();
-        // Repartir dos cartas a cada uno de los seis jugadores.
-        // Se reutiliza una sola baraja para evitar duplicados.
-        for (int ronda = 0; ronda < 2; ronda++) {
-            for (PlayerPanel jugador : jugadores) {
-                Carta carta = baraja.repartir();
-                jugador.mostrarCarta(ronda, carta);
+    private void repartirCartas() {
+    	if(repartoManual) {
+    		for (PlayerPanel jugador : jugadores) {
+            	int ronda = 0;
+            	while(ronda != 2) {
+            		
+            		String entrada = JOptionPane.showInputDialog(
+                            this,
+                            "Introduce la carta " + (ronda + 1)
+                                + " del " + jugador.getName()
+                                + "\nFormato: Ah, Ks, 5d, Qc...",
+                            "Reparto manual",
+                            JOptionPane.QUESTION_MESSAGE
+                        );
+            		
+            		if (entrada == null) {
+                        mensaje.setText("Reparto manual cancelado");
+                        botonFlop.setEnabled(false);
+                        return;
+                    }
+
+                    entrada = entrada.trim();
+
+                    Carta carta = parsearCarta(entrada);
+                    
+                    if (carta == null) {
+                        JOptionPane.showMessageDialog(
+                            this,
+                            "Carta no válida. Ejemplos: Ah, Ks, 5d, Qc.",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                        );
+                        continue;
+                    }
+
+                    boolean esta = baraja.eliminar(carta);
+
+                    if (!esta) {
+                        JOptionPane.showMessageDialog(
+                            this,
+                            "Esa carta ya ha sido asignada a otro jugador.",
+                            "Carta duplicada",
+                            JOptionPane.WARNING_MESSAGE
+                        );
+                        continue;
+                    }
+                    jugador.mostrarCarta(ronda, carta);
+                    ronda++;
+            	}
             }
-        }
-
-        // Repartir las cinco cartas comunitarias.
-        /*for (int i = 0; i < cartasComunitarias.length; i++) {
-            Carta carta = baraja.repartir();
-            //
-            cartasComunes.add(carta);
-            //
-            mostrarImagen(
-                cartasComunitarias[i],
-                carta.get_carta_PNG()
-            );
-        }*/
-
-        // El equity queda pendiente de calcular.
+    	}else {
+    		baraja.barajar();
+            // Repartir dos cartas a cada uno de los seis jugadores.
+            // Se reutiliza una sola baraja para evitar duplicados.
+            for (int ronda = 0; ronda < 2; ronda++) {
+                for (PlayerPanel jugador : jugadores) {
+                    Carta carta = baraja.repartir();
+                    jugador.mostrarCarta(ronda, carta);
+                }
+            }
+    	}
+    	
+    	// El equity queda pendiente de calcular.
         for (PlayerPanel jugador : jugadores) {
             jugador.setEquity(null);
         }
-
         mensaje.setText("Manos repartidas correctamente");
     }
 
@@ -298,6 +327,52 @@ public class PokerBoardGui extends JFrame {
 	        }
     	else {
     		
+        	int ronda = 0;
+        	while(ronda != 3) {
+        		String entrada = JOptionPane.showInputDialog(
+                        this,
+                        "Introduce la carta " + (ronda + 1)
+                            + " de la mesa "
+                            + "\nFormato: Ah, Ks, 5d, Qc...",
+                        "Reparto manual",
+                        JOptionPane.QUESTION_MESSAGE
+                    );
+        		
+        		if (entrada == null) {
+                    mensaje.setText("Reparto manual cancelado");
+                    botonTurn.setEnabled(false);
+                    return;
+                }
+
+                entrada = entrada.trim();
+
+                Carta carta = parsearCarta(entrada);
+                
+                if (carta == null) {
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "Carta no válida. Ejemplos: Ah, Ks, 5d, Qc.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                    continue;
+                }
+
+                boolean esta = baraja.eliminar(carta);
+
+                if (!esta) {
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "Esa carta ya ha sido asignada.",
+                        "Carta duplicada",
+                        JOptionPane.WARNING_MESSAGE
+                    );
+                    continue;
+                }
+                cartasComunes.add(carta);
+                mostrarImagen(cartasComunitarias[ronda],carta.get_carta_PNG());
+                ronda++;
+        	}
     	}
     	
     	mensaje.setText("Flop repartido correctamente");
@@ -316,7 +391,53 @@ public class PokerBoardGui extends JFrame {
 	            );
 	        }
     	else {
-    		
+    		int ronda = 3;
+        	while(ronda != 4) {
+        		String entrada = JOptionPane.showInputDialog(
+                        this,
+                        "Introduce la carta " + (ronda + 1)
+                            + " de la mesa"
+                            + "\nFormato: Ah, Ks, 5d, Qc...",
+                        "Reparto manual",
+                        JOptionPane.QUESTION_MESSAGE
+                    );
+        		
+        		if (entrada == null) {
+                    mensaje.setText("Reparto manual cancelado");
+                    botonRiver.setEnabled(false);
+                    return;
+                }
+
+                entrada = entrada.trim();
+
+                Carta carta = parsearCarta(entrada);
+                
+                if (carta == null) {
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "Carta no válida. Ejemplos: Ah, Ks, 5d, Qc.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                    continue;
+                }
+
+                boolean esta = baraja.eliminar(carta);
+
+                if (!esta) {
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "Esa carta ya ha sido asignada.",
+                        "Carta duplicada",
+                        JOptionPane.WARNING_MESSAGE
+                    );
+                    continue;
+                }
+                
+                cartasComunes.add(carta);
+                mostrarImagen(cartasComunitarias[ronda],carta.get_carta_PNG());
+                ronda++;
+        	}
     	}
     	
     	mensaje.setText("Turn repartido correctamente");
@@ -335,7 +456,51 @@ public class PokerBoardGui extends JFrame {
 	            );
 	        }
     	else {
-    		
+    		int ronda = 4;
+        	while(ronda != 5) {
+        		String entrada = JOptionPane.showInputDialog(
+                        this,
+                        "Introduce la carta " + (ronda + 1)
+                            + " de la mesa"
+                            + "\nFormato: Ah, Ks, 5d, Qc...",
+                        "Reparto manual",
+                        JOptionPane.QUESTION_MESSAGE
+                    );
+        		
+        		if (entrada == null) {
+                    mensaje.setText("Reparto manual cancelado");
+                    return;
+                }
+
+                entrada = entrada.trim();
+
+                Carta carta = parsearCarta(entrada);
+                
+                if (carta == null) {
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "Carta no válida. Ejemplos: Ah, Ks, 5d, Qc.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                    continue;
+                }
+
+                boolean esta = baraja.eliminar(carta);
+
+                if (!esta) {
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "Esa carta ya ha sido asignada.",
+                        "Carta duplicada",
+                        JOptionPane.WARNING_MESSAGE
+                    );
+                    continue;
+                }
+                cartasComunes.add(carta);
+                mostrarImagen(cartasComunitarias[ronda],carta.get_carta_PNG());
+                ronda++;
+        	}
     	}
     	
     	mensaje.setText("River repartido correctamente");
@@ -460,6 +625,10 @@ public class PokerBoardGui extends JFrame {
         public Jugador getJugador() {
         	return yo;
         }
+    
+        public String getName() {
+        	return minombre;
+        }
     }
 
 	private JPanel crearPanelRangos() {
@@ -574,6 +743,38 @@ public class PokerBoardGui extends JFrame {
 	    rankingTexto.setText(
 	        "Top " + porcentaje + "%\n" + rango
 	    );
-}
+	}
+	
+	private Carta parsearCarta(String entrada) {
+	    if (entrada == null) {
+	        return null;
+	    }
 
+	    entrada = entrada.trim();
+
+	    if (entrada.length() < 2 || entrada.length() > 3) {
+	        return null;
+	    }
+
+	    String valor = entrada.substring(0, entrada.length() - 1)
+	        .toUpperCase();
+
+	    String palo = entrada.substring(entrada.length() - 1)
+	        .toLowerCase();
+
+	    java.util.List<String> valores = java.util.Arrays.asList(
+	        "2", "3", "4", "5", "6", "7", "8", "9",
+	        "T", "J", "Q", "K", "A"
+	    );
+
+	    java.util.List<String> palos = java.util.Arrays.asList(
+	        "h", "d", "c", "s"
+	    );
+
+	    if (!valores.contains(valor) || !palos.contains(palo)) {
+	        return null;
+	    }
+
+	    return new Carta("" + valor + palo);
+	}
 }
