@@ -307,9 +307,7 @@ public class PokerBoardGui extends JFrame {
     	}
     	
     	// El equity queda pendiente de calcular.
-        for (PlayerPanel jugador : jugadores) {
-            jugador.setEquity(null);
-        }
+        calcularEquity();
         mensaje.setText("Manos repartidas correctamente");
     }
 
@@ -374,7 +372,7 @@ public class PokerBoardGui extends JFrame {
                 ronda++;
         	}
     	}
-    	
+    	calcularEquity();
     	mensaje.setText("Flop repartido correctamente");
     }
     
@@ -439,7 +437,7 @@ public class PokerBoardGui extends JFrame {
                 ronda++;
         	}
     	}
-    	
+    	calcularEquity();
     	mensaje.setText("Turn repartido correctamente");
     }
     
@@ -502,7 +500,7 @@ public class PokerBoardGui extends JFrame {
                 ronda++;
         	}
     	}
-    	
+    	calcularEquity();
     	mensaje.setText("River repartido correctamente");
     }
 
@@ -777,4 +775,27 @@ public class PokerBoardGui extends JFrame {
 
 	    return new Carta("" + valor + palo);
 	}
+	
+
+	private void calcularEquity() {
+	
+	    ArrayList<Jugador> jugadoresMesa = new ArrayList<>();
+	
+	    for (PlayerPanel panel : jugadores) {
+	        jugadoresMesa.add(panel.getJugador());
+	    }
+	
+	    double[] resultados = CalculadoraEquity.calcular(
+	        jugadoresMesa,
+	        new ArrayList<>(cartasComunes),
+	        baraja.getCartasRestantes()
+	    );
+	
+	    for (int i = 0; i < jugadores.length; i++) {
+	        jugadores[i].setEquity(resultados[i]);
+	    }
+	
+	    mensaje.setText("Equity calculado correctamente");
+	}
+
 }
