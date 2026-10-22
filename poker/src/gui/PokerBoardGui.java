@@ -225,8 +225,6 @@ public class PokerBoardGui extends JFrame {
         									   botonRepartirRandom.setEnabled(true);
         									   botonRepartirManual.setEnabled(true);
         									   botonFlop.setEnabled(false);
-        									   botonTurn.setEnabled(false);
-        									   botonRiver.setEnabled(false);
         									   });
         
         botonFlop.setEnabled(false);

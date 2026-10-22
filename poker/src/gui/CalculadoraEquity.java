@@ -2,6 +2,8 @@ package gui;
 
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.List;
+import java.util.concurrent.*;
 
 import cartas.Carta;
 import cartas.Jugador;
@@ -9,11 +11,7 @@ import cartas.Mano;
 
 public class CalculadoraEquity {
 
-    /**
-     * Método automático que selecciona la estrategia óptima:
-     * - Enumeración exacta si faltan <= 2 cartas (Turn y River).
-     * - Monte Carlo si faltan > 2 cartas (Pre-flop y Flop).
-     */
+    
     public static double[] calcularAuto(
             ArrayList<Jugador> jugadores,
             ArrayList<Carta> comunitarias,
@@ -23,24 +21,23 @@ public class CalculadoraEquity {
         int faltan = 5 - comunitarias.size();
 
         if (exacto||faltan <= 2) {
-            // Rápido e idóneo para Turn y River (Enumeración exacta)
-            return calcular(jugadores, comunitarias, restantes);
+            
+        	return calcular(jugadores, comunitarias, restantes);
         } else {
-            // Ultra rápido para Pre-flop y Flop (Monte Carlo con 10.000 iteraciones)
-            return calcularMonteCarlo(jugadores, comunitarias, restantes, 10000);
+
+        	return calcularMonteCarlo(jugadores, comunitarias, restantes, 10000);
         }
     }
 
-    /**
-     * Cálculo mediante Enumeración Exacta (Backtracking).
-     */
+
     public static double[] calcular(
             ArrayList<Jugador> jugadores,
             ArrayList<Carta> comunitarias,
             ArrayList<Carta> restantes) {
 
-        double[] equity = new double[jugadores.size()];
-        int faltan = 5 - comunitarias.size();
+        final int n = jugadores.size();
+        final int faltan = 5 - comunitarias.size();
+        final int HILOS = 16;
 
         if (faltan < 0 || restantes.size() < faltan) {
             throw new IllegalArgumentException(
@@ -48,35 +45,65 @@ public class CalculadoraEquity {
             );
         }
 
-        // Acumulador del número de tableros evaluados.
+        double[] equity = new double[n];
         int[] total = {0};
 
-        // Copiamos las cartas comunitarias conocidas.
-        ArrayList<Carta> tablero = new ArrayList<>(comunitarias);
+        if (faltan == 0) {
+            // Mesa completa: un solo tablero, sin hilos
+            generarTableros(jugadores, restantes, new ArrayList<>(comunitarias),
+                            0, 0, equity, total);
+        } else {
+            final int nRamas = restantes.size() - faltan + 1;
+            final double[][] parcialEquity = new double[HILOS][n];
+            final int[] parcialTotal = new int[HILOS];
+            Thread[] hilos = new Thread[HILOS];
 
-        generarTableros(
-            jugadores,
-            restantes,
-            tablero,
-            faltan,
-            0,
-            equity,
-            total
-        );
+            for (int t = 0; t < HILOS; t++) {
+                final int idx = t;
+                hilos[t] = new Thread(() -> {
+                    int[] miTotal = {0};
 
-        // Convertimos las proporciones en porcentajes.
-        if (total[0] > 0) {
-            for (int i = 0; i < equity.length; i++) {
-                equity[i] = equity[i] * 100.0 / total[0];
+                    // Este hilo hace las ramas idx, idx+5, idx+10...
+                    for (int rama = idx; rama < nRamas; rama += HILOS) {
+                        ArrayList<Carta> tablero = new ArrayList<>(comunitarias);
+                        tablero.add(restantes.get(rama));
+
+                        generarTableros(jugadores, restantes, tablero,
+                                        faltan - 1, rama + 1,
+                                        parcialEquity[idx], miTotal);
+                    }
+                    parcialTotal[idx] = miTotal[0];
+                });
+                hilos[t].start();
+            }
+
+            // Esperar a los 5 hilos
+            for (Thread h : hilos) {
+                try {
+                    h.join();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("Cálculo interrumpido", e);
+                }
+            }
+
+            // Sumar lo que calculó cada hilo
+            for (int t = 0; t < HILOS; t++) {
+                for (int i = 0; i < n; i++) {
+                    equity[i] += parcialEquity[t][i];
+                }
+                total[0] += parcialTotal[t];
             }
         }
 
+        if (total[0] > 0) {
+            for (int i = 0; i < n; i++) {
+                equity[i] = equity[i] * 100.0 / total[0];
+            }
+        }
         return equity;
     }
-
-    /**
-     * Cálculo mediante Simulación Monte Carlo.
-     */
+     
     public static double[] calcularMonteCarlo(
             ArrayList<Jugador> jugadores,
             ArrayList<Carta> comunitarias,
@@ -178,12 +205,7 @@ public class CalculadoraEquity {
 
             Jugador jugador = jugadores.get(i);
 
-            jugador.obtenerMejorMano(
-                new ArrayList<>(tablero)
-            );
-
-            manos[i] = jugador.getMejorMano();
-
+            manos[i] = jugador.obtenerMejorMano(new ArrayList<>(tablero));
             if (mejor == null ||
                 manos[i].compareTo(mejor) > 0) {
 

@@ -46,8 +46,8 @@ public class Jugador implements Comparable<Jugador> {
 		Equity = equity;
 	}
 
-	public void obtenerMejorMano(ArrayList<Carta> cartas) {
-    	this.mejorMano = null;
+	public Mano obtenerMejorMano(ArrayList<Carta> cartas) {
+    	 Mano mejor = null; 
     	cartas.addAll(cartasPropias);
     	for (int i = 0; i < cartas.size() - 4; i++) {
     	    for (int j = i + 1; j < cartas.size() - 3; j++) {
@@ -66,15 +66,18 @@ public class Jugador implements Comparable<Jugador> {
     	                    combinacion.sort(Carta.POR_VALOR_DESC);
     	                    Mano mano = new Mano(combinacion);
 
-    	                    if(mejorMano == null || mano.compareTo(mejorMano) > 0) {
-    	                    	mejorMano = mano;
+    	                    if(mejor == null || mano.compareTo(mejor) > 0) {
+    	                    	mejor = mano;
     	                    }
     	                }
     	            }
     	        }
     	    }
     	}
-    }
+    this.mejorMano=mejor;
+    return mejor;
+    	
+	}
     
     public Mano evaluarOmaha(ArrayList<Carta> cartasComunes) {
         Mano mejorMano = null;
