@@ -9,6 +9,7 @@ import cartas.Jugador;
 import java.awt.*;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.concurrent.CompletionStage;
 
 public class PokerBoardGui extends JFrame {
 
@@ -24,15 +25,21 @@ public class PokerBoardGui extends JFrame {
     private JButton botonFlop;
     private JButton botonTurn;
     private JButton botonRiver;
+    private JButton botonRecalcular;
+    private String stage = "preflop"; 
+    
     private boolean repartoManual = false;
     private ArrayList<Carta> cartasComunes = new ArrayList<Carta>();
     private Baraja baraja = new Baraja();
     private JCheckBox modoTexto;
+    private JCheckBox calcularExacto;
     private JCheckBox modoPorcentaje;
 
     private JTextField campoRango;
     private JComboBox<Integer> selectorPorcentaje;
+    ArrayList<Jugador> jugadoresMesa;
     private JTextArea rankingTexto;
+   
 
     private final String[] rangosRanking = {
         "22+, AJs+, KQs, AQo+",
@@ -159,37 +166,70 @@ public class PokerBoardGui extends JFrame {
         botonRepartirManual = new JButton("Repartir Manual");
         botonRepartirRandom = new JButton("Repartir Random");
         botonReiniciar = new JButton("Reiniciar");
-        botonFlop = new JButton("Flop");
-        botonTurn = new JButton("Turn");
-        botonRiver = new JButton("River");
+        botonFlop = new JButton("Siguiente stage");
+        botonFlop.setEnabled(false);
+        botonRecalcular = new JButton("Recalcular");
+        botonRecalcular.setEnabled(false);
+        
 
         botonRepartirManual.addActionListener(e -> {repartoManual = true;
         											botonFlop.setEnabled(true);
         											botonRepartirManual.setEnabled(false);
         											botonRepartirRandom.setEnabled(false);
-        											repartirCartas();});
+        											repartirCartas();
+        											botonFlop.setEnabled(true);
+        											botonRecalcular.setEnabled(true);});
         botonRepartirRandom.addActionListener(e -> {botonFlop.setEnabled(true);
         									  		botonRepartirRandom.setEnabled(false);
         									  		botonRepartirManual.setEnabled(false);
-        									  		repartirCartas();});
-        botonFlop.addActionListener(e -> {botonTurn.setEnabled(true);
-        								  botonFlop.setEnabled(false);
-        								  flop();});
-        botonTurn.addActionListener(e -> {botonRiver.setEnabled(true);
-        								  botonTurn.setEnabled(false);
-        								  turn();});
-        botonRiver.addActionListener(e -> {botonRiver.setEnabled(false);
-        								   river();});
+        									  		repartirCartas();
+        									  		botonFlop.setEnabled(true);
+        									  		botonRecalcular.setEnabled(true);});
+        botonFlop.addActionListener(e -> {
+            switch (stage) {
+                case "preflop":
+                    stage = "flop";
+                    flop();
+                    break;
+                case "flop":
+                    stage = "turn";
+                    turn();
+                    break;
+                case "turn":
+                    stage = "river";
+                    river();
+                    break;
+                default:
+                    break;
+            }
+        });
+        
+       
+       botonRecalcular.addActionListener(e -> {
+    	   double[] resultados = CalculadoraEquity.calcularAuto(
+    		        jugadoresMesa,
+    		        new ArrayList<>(cartasComunes),
+    		        baraja.getCartasRestantes(),
+    		        calcularExacto.isSelected()
+    		    );
+    		
+    		    for (int i = 0; i < jugadores.length; i++) {
+    		        jugadores[i].setEquity(resultados[i]);
+    		    }
+    		
+    		    mensaje.setText("Equity calculado correctamente");
+    	   
+    	   
+       });
         botonReiniciar.addActionListener(e -> {reiniciar();
         									   botonRepartirRandom.setEnabled(true);
         									   botonRepartirManual.setEnabled(true);
         									   botonFlop.setEnabled(false);
         									   botonTurn.setEnabled(false);
-        									   botonRiver.setEnabled(false);});
+        									   botonRiver.setEnabled(false);
+        									   });
         
         botonFlop.setEnabled(false);
-        botonTurn.setEnabled(false);
-        botonRiver.setEnabled(false);
 
         JPanel controles = new JPanel(
             new FlowLayout(FlowLayout.CENTER, 20, 12)
@@ -198,9 +238,8 @@ public class PokerBoardGui extends JFrame {
         controles.add(botonRepartirManual);
         controles.add(botonRepartirRandom);
         controles.add(botonFlop);
-        controles.add(botonTurn);
-        controles.add(botonRiver);
         controles.add(botonReiniciar);
+        controles.add(botonRecalcular);
         controles.add(mensaje);
 
         add(controles, BorderLayout.SOUTH);
@@ -518,7 +557,9 @@ public class PokerBoardGui extends JFrame {
         
         cartasComunes = new ArrayList<Carta>();
         repartoManual = false;
-        
+        stage="preflop";
+        botonRecalcular.setEnabled(false);
+        calcularExacto.setSelected(repartoManual);
         mensaje.setText("Pulsa Repartir para comenzar");
     }
 
@@ -641,6 +682,7 @@ public class PokerBoardGui extends JFrame {
 	    gbc.weightx = 1.0;
 	
 	    modoTexto = new JCheckBox("Introducir rango textual", true);
+	    calcularExacto = new JCheckBox("Calcular Equity exacto para preflop? Default : Estimación", false);
 	    modoPorcentaje = new JCheckBox("Seleccionar por porcentaje");
 	
 	    campoRango = new JTextField(
@@ -663,6 +705,7 @@ public class PokerBoardGui extends JFrame {
 	    gbc.gridy = 0;
 	    gbc.gridwidth = 2;
 	    panel.add(modoTexto, gbc);
+	    
 	
 	    gbc.gridy = 1;
 	    panel.add(campoRango, gbc);
@@ -686,6 +729,12 @@ public class PokerBoardGui extends JFrame {
 	
 	    gbc.gridy = 5;
 	    panel.add(scroll, gbc);
+	    
+	    gbc.gridx = 0;
+	    gbc.gridy = 6;
+	    gbc.gridwidth = 2;
+	    panel.add(calcularExacto, gbc);
+	    
 	
 	    // Exclusión mutua entre los dos modos.
 	    modoTexto.addActionListener(e -> {
@@ -779,16 +828,17 @@ public class PokerBoardGui extends JFrame {
 
 	private void calcularEquity() {
 	
-	    ArrayList<Jugador> jugadoresMesa = new ArrayList<>();
+		jugadoresMesa = new ArrayList<>();
 	
 	    for (PlayerPanel panel : jugadores) {
 	        jugadoresMesa.add(panel.getJugador());
 	    }
 	
-	    double[] resultados = CalculadoraEquity.calcular(
+	    double[] resultados = CalculadoraEquity.calcularAuto(
 	        jugadoresMesa,
 	        new ArrayList<>(cartasComunes),
-	        baraja.getCartasRestantes()
+	        baraja.getCartasRestantes(),
+	        calcularExacto.isSelected()
 	    );
 	
 	    for (int i = 0; i < jugadores.length; i++) {
