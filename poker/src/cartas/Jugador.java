@@ -8,6 +8,7 @@ public class Jugador implements Comparable<Jugador> {
     private ArrayList<Carta> cartasPropias;
     private Mano mejorMano;
     private Double Equity;
+    private String miCombo;
 
     public Jugador(String id, ArrayList<Carta> cartasPropias) {
         this.id = id;
@@ -26,6 +27,13 @@ public class Jugador implements Comparable<Jugador> {
     	if(cartasPropias.size() < 2) {
     		cartasPropias.add(carta);
     	}
+    	if(cartasPropias.size() == 2) {
+    		miCombo = ParserCombos.obtenerCombos2Cartas(cartasPropias);
+    	}
+    }
+    
+    public String getCombo() {
+    	return miCombo;
     }
     
     @Override
