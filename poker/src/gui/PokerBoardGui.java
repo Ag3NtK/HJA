@@ -675,23 +675,14 @@ public class PokerBoardGui extends JFrame {
 	
 	private void actualizarRango() {
 		String texto = campoRango.getText();
+		ArrayList<String> rangoDado;
 
 	    // Evitar errores si el campo está vacío.
 	    if (texto.isEmpty()) {
 	    	campoRango.setBackground(Color.WHITE);
 	    	rangoTexto.setText("Introduce un rango.");
 	        return;
-	    }
-
-	    ArrayList<String> rangoDado;
-	    
-	    rangoDado = ParserCombos.parsearDevolverCombos(texto);
-	    
-	    if(rangoDado == null) {
-	    	campoRango.setBackground(Color.red);
-	    	rangoTexto.setText("El rango introducido esta mal ecrito, reviselo.");
-	        return;
-	    }
+	    }	    
 	    
 	    campoRango.setBackground(Color.WHITE);
 	    Jugador hero = jugadores[3].getJugador();
@@ -699,6 +690,14 @@ public class PokerBoardGui extends JFrame {
 	    if (hero == null || hero.getCombo() == null) {
 	    	campoRango.setBackground(Color.WHITE);
 	        rangoTexto.setText("Reparte las dos cartas del Hero primero.");
+	        return;
+	    }
+	    
+	    rangoDado = ParserCombos.parsearDevolverCombos(texto, rangoTexto);
+	    
+	    if(rangoDado == null) {
+	    	campoRango.setBackground(Color.red);
+	    	//rangoTexto.setText("El rango introducido esta mal ecrito, reviselo.");
 	        return;
 	    }
 			

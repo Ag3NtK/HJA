@@ -40,4 +40,13 @@ public enum Rank {
         }
         throw new IllegalArgumentException("Símbolo no válido: " + symbol);
     }
+    
+    public static Rank fromValue(int valor) {
+        for (Rank rank : Rank.values()) {
+            if (rank.value == valor) {
+                return rank;
+            }
+        }
+        throw new IllegalArgumentException("Valor no válido: " + valor);
+    }
 }
