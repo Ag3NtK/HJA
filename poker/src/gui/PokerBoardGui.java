@@ -10,7 +10,6 @@ import cartas.ParserCombos;
 import java.awt.*;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.concurrent.CompletionStage;
 
 public class PokerBoardGui extends JFrame {
 
@@ -24,8 +23,6 @@ public class PokerBoardGui extends JFrame {
     private JButton botonRepartirRandom;
     private JButton botonReiniciar;
     private JButton botonFlop;
-    private JButton botonTurn;
-    private JButton botonRiver;
     private JButton botonRecalcular;
     private String stage = "preflop"; 
     
@@ -311,54 +308,24 @@ public class PokerBoardGui extends JFrame {
     
     private void repartirCartas() {
     	if(repartoManual) {
-    		for (PlayerPanel jugador : jugadores) {
-            	int ronda = 0;
-            	while(ronda != 2) {
-            		
-            		String entrada = JOptionPane.showInputDialog(
-                            this,
-                            "Introduce la carta " + (ronda + 1)
-                                + " del " + jugador.getName()
-                                + "\nFormato: Ah, Ks, 5d, Qc...",
-                            "Reparto manual",
-                            JOptionPane.QUESTION_MESSAGE
-                        );
-            		
-            		if (entrada == null) {
-                        mensaje.setText("Reparto manual cancelado");
-                        botonFlop.setEnabled(false);
-                        return;
-                    }
-
-                    entrada = entrada.trim();
-
-                    Carta carta = parsearCarta(entrada);
-                    
-                    if (carta == null) {
-                        JOptionPane.showMessageDialog(
-                            this,
-                            "Carta no válida. Ejemplos: Ah, Ks, 5d, Qc.",
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE
-                        );
-                        continue;
-                    }
-
-                    boolean esta = baraja.eliminar(carta);
-
-                    if (!esta) {
-                        JOptionPane.showMessageDialog(
-                            this,
-                            "Esa carta ya ha sido asignada a otro jugador.",
-                            "Carta duplicada",
-                            JOptionPane.WARNING_MESSAGE
-                        );
-                        continue;
-                    }
-                    jugador.mostrarCarta(ronda, carta);
-                    ronda++;
-            	}
-            }
+    	    for (PlayerPanel jugador : jugadores) {
+    	        DialogoSeleccionCartas dialogo = new DialogoSeleccionCartas(this, "Elige 2 cartas para " + jugador.getName(), 2, baraja);
+    	        dialogo.setVisible(true); // Se pausa aquí hasta que el usuario confirme
+    	        
+    	        ArrayList<Carta> seleccion = dialogo.getSeleccion();
+    	        
+    	        if (seleccion.size() != 2) {
+    	            mensaje.setText("Reparto manual cancelado");
+    	            botonFlop.setEnabled(false);
+    	            return;
+    	        }
+    	        
+    	        for (int i = 0; i < 2; i++) {
+    	            Carta carta = seleccion.get(i);
+    	            baraja.eliminar(carta); // La quitamos de la baraja real
+    	            jugador.mostrarCarta(i, carta);
+    	        }
+    	    }
     	}else {
     		baraja.barajar();
             // Repartir dos cartas a cada uno de los seis jugadores.
@@ -389,52 +356,21 @@ public class PokerBoardGui extends JFrame {
 	            );
 	        }
     	else {
-    		
-        	int ronda = 0;
-        	while(ronda != 3) {
-        		String entrada = JOptionPane.showInputDialog(
-                        this,
-                        "Introduce la carta " + (ronda + 1)
-                            + " de la mesa "
-                            + "\nFormato: Ah, Ks, 5d, Qc...",
-                        "Reparto manual",
-                        JOptionPane.QUESTION_MESSAGE
-                    );
-        		
-        		if (entrada == null) {
-                    mensaje.setText("Reparto manual cancelado");
-                    return;
-                }
-
-                entrada = entrada.trim();
-
-                Carta carta = parsearCarta(entrada);
-                
-                if (carta == null) {
-                    JOptionPane.showMessageDialog(
-                        this,
-                        "Carta no válida. Ejemplos: Ah, Ks, 5d, Qc.",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE
-                    );
-                    continue;
-                }
-
-                boolean esta = baraja.eliminar(carta);
-
-                if (!esta) {
-                    JOptionPane.showMessageDialog(
-                        this,
-                        "Esa carta ya ha sido asignada.",
-                        "Carta duplicada",
-                        JOptionPane.WARNING_MESSAGE
-                    );
-                    continue;
-                }
-                cartasComunes.add(carta);
-                mostrarImagen(cartasComunitarias[ronda],carta.get_carta_PNG());
-                ronda++;
-        	}
+    	    DialogoSeleccionCartas dialogo = new DialogoSeleccionCartas(this, "Elige 3 cartas para el Flop", 3, baraja);
+    	    dialogo.setVisible(true);
+    	    
+    	    ArrayList<Carta> seleccion = dialogo.getSeleccion();
+    	    if (seleccion.size() != 3) {
+    	        mensaje.setText("Reparto manual cancelado");
+    	        return;
+    	    }
+    	    
+    	    for (int i = 0; i < 3; i++) {
+    	        Carta carta = seleccion.get(i);
+    	        baraja.eliminar(carta);
+    	        cartasComunes.add(carta);
+    	        mostrarImagen(cartasComunitarias[i], carta.get_carta_PNG());
+    	    }
     	}
     	calcularEquity();
     	mensaje.setText("Flop repartido correctamente");
@@ -453,52 +389,19 @@ public class PokerBoardGui extends JFrame {
 	            );
 	        }
     	else {
-    		int ronda = 3;
-        	while(ronda != 4) {
-        		String entrada = JOptionPane.showInputDialog(
-                        this,
-                        "Introduce la carta " + (ronda + 1)
-                            + " de la mesa"
-                            + "\nFormato: Ah, Ks, 5d, Qc...",
-                        "Reparto manual",
-                        JOptionPane.QUESTION_MESSAGE
-                    );
-        		
-        		if (entrada == null) {
-                    mensaje.setText("Reparto manual cancelado");
-                    return;
-                }
-
-                entrada = entrada.trim();
-
-                Carta carta = parsearCarta(entrada);
-                
-                if (carta == null) {
-                    JOptionPane.showMessageDialog(
-                        this,
-                        "Carta no válida. Ejemplos: Ah, Ks, 5d, Qc.",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE
-                    );
-                    continue;
-                }
-
-                boolean esta = baraja.eliminar(carta);
-
-                if (!esta) {
-                    JOptionPane.showMessageDialog(
-                        this,
-                        "Esa carta ya ha sido asignada.",
-                        "Carta duplicada",
-                        JOptionPane.WARNING_MESSAGE
-                    );
-                    continue;
-                }
-                
-                cartasComunes.add(carta);
-                mostrarImagen(cartasComunitarias[ronda],carta.get_carta_PNG());
-                ronda++;
-        	}
+    	    DialogoSeleccionCartas dialogo = new DialogoSeleccionCartas(this, "Elige 1 carta para el Turn", 1, baraja);
+    	    dialogo.setVisible(true);
+    	    
+    	    ArrayList<Carta> seleccion = dialogo.getSeleccion();
+    	    if (seleccion.size() != 1) {
+    	        mensaje.setText("Reparto manual cancelado");
+    	        return;
+    	    }
+    	    
+    	    Carta carta = seleccion.get(0);
+    	    baraja.eliminar(carta);
+    	    cartasComunes.add(carta);
+    	    mostrarImagen(cartasComunitarias[3], carta.get_carta_PNG());
     	}
     	calcularEquity();
     	mensaje.setText("Turn repartido correctamente");
@@ -517,51 +420,19 @@ public class PokerBoardGui extends JFrame {
 	            );
 	        }
     	else {
-    		int ronda = 4;
-        	while(ronda != 5) {
-        		String entrada = JOptionPane.showInputDialog(
-                        this,
-                        "Introduce la carta " + (ronda + 1)
-                            + " de la mesa"
-                            + "\nFormato: Ah, Ks, 5d, Qc...",
-                        "Reparto manual",
-                        JOptionPane.QUESTION_MESSAGE
-                    );
-        		
-        		if (entrada == null) {
-                    mensaje.setText("Reparto manual cancelado");
-                    return;
-                }
-
-                entrada = entrada.trim();
-
-                Carta carta = parsearCarta(entrada);
-                
-                if (carta == null) {
-                    JOptionPane.showMessageDialog(
-                        this,
-                        "Carta no válida. Ejemplos: Ah, Ks, 5d, Qc.",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE
-                    );
-                    continue;
-                }
-
-                boolean esta = baraja.eliminar(carta);
-
-                if (!esta) {
-                    JOptionPane.showMessageDialog(
-                        this,
-                        "Esa carta ya ha sido asignada.",
-                        "Carta duplicada",
-                        JOptionPane.WARNING_MESSAGE
-                    );
-                    continue;
-                }
-                cartasComunes.add(carta);
-                mostrarImagen(cartasComunitarias[ronda],carta.get_carta_PNG());
-                ronda++;
-        	}
+    	    DialogoSeleccionCartas dialogo = new DialogoSeleccionCartas(this, "Elige 1 carta para el River", 1, baraja);
+    	    dialogo.setVisible(true);
+    	    
+    	    ArrayList<Carta> seleccion = dialogo.getSeleccion();
+    	    if (seleccion.size() != 1) {
+    	        mensaje.setText("Reparto manual cancelado");
+    	        return;
+    	    }
+    	    
+    	    Carta carta = seleccion.get(0);
+    	    baraja.eliminar(carta);
+    	    cartasComunes.add(carta);
+    	    mostrarImagen(cartasComunitarias[4], carta.get_carta_PNG());
     	}
     	calcularEquity();
     	mensaje.setText("River repartido correctamente");
