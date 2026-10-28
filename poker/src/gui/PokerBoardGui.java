@@ -17,8 +17,6 @@ public class PokerBoardGui extends JFrame {
 
     private final PlayerPanel[] jugadores = new PlayerPanel[6];
     private final JLabel[] cartasComunitarias = new JLabel[5];
-    
-    //
     private JButton botonRepartirManual;
     private JButton botonRepartirRandom;
     private JButton botonReiniciar;
@@ -38,44 +36,31 @@ public class PokerBoardGui extends JFrame {
     ArrayList<Jugador> jugadoresMesa;
     private JTextArea rangoTexto;
     private JTextArea rankingTexto;
-   
 
     private static final String[] RANKING_SKLANSKY_CHUBUKOV = {
-    	    // === Umbral de 50.0 bb o superior ===
     	    "AA", "KK", "QQ", "JJ", "TT", "99", "88", "77", "66",
     	    "AKs", "AQs", "AJs", "ATs", "A9s", 
     	    "AKo", "AQo", "AJo", "ATo", "KQo",
-
-    	    // === Umbrales altos (> 10 bb) ===
     	    "55", "A8s", "A7s", "A6s", "A5s", "A4s", "A3s", "A2s",
     	    "KQs", "KJs", "KTs", "A9o", "KJo", "QJs", "44", "A8o",
     	    "K9s", "QTs", "KTo", "A7o", "A6o", "33", "A5o", "QJo",
-
-    	    // === Umbrales medios (5.0 bb a 10.0 bb) ===
     	    "JTs", "K8s", "Q9s", "A4o", "QTo", "A3o", "K9o", "J9s",
     	    "K7s", "A2o", "22", "K8o", "Q8s", "T9s", "JTo", "K6s",
     	    "Q9o", "J8s", "K5s", "K7o", "K4s", "Q7s", "T8s", "J9o",
-
-    	    // === Umbrales bajos (2.5 bb a 5.0 bb) ===
     	    "K6o", "K3s", "Q8o", "J8o", "98s", "K2s", "K5o", "Q6s",
     	    "J7s", "T9o", "Q5s", "K4o", "T7s", "Q7o", "97s", "Q4s",
     	    "J7o", "K3o", "Q3s", "T8o", "J6s", "87s", "Q5o", "Q2s",
     	    "K2o", "J5s", "98o", "96s", "J6o", "Q4o", "T6s", "J4s",
-
-    	    // === Umbrales marginales (1.5 bb a 2.5 bb) ===
     	    "86s", "J5o", "Q3o", "T7o", "76s", "J3s", "97o", "Q2o",
     	    "J2s", "85s", "T5s", "J4o", "95s", "J3o", "87o", "75s",
     	    "T6o", "T4s", "65s", "J2o", "86o", "96o", "76o", "T3s",
     	    "54s", "T5o", "84s", "94s", "T2s", "74s", "T4o", "64s",
-
-    	    // === Umbrales mínimos (< 1.5 bb) ===
     	    "85o", "75o", "T3o", "95o", "65o", "53s", "83s", "T2o",
     	    "54o", "73s", "93s", "84o", "64o", "82s", "63s", "94o",
     	    "74o", "92s", "52s", "43s", "93o", "53o", "72s", "83o",
     	    "62s", "63o", "42s", "92o", "82o", "73o", "52o", "43o",
     	    "32s", "72o", "62o", "42o", "32o"
     	};
-    //
 
     private final JLabel mensaje = new JLabel(
         "Pulsa Repartir para comenzar",
@@ -230,22 +215,7 @@ public class PokerBoardGui extends JFrame {
         });
         
        
-       botonRecalcular.addActionListener(e -> {
-    	   /*double[] resultados = CalculadoraEquity.calcularAuto(
-    		        jugadoresMesa,
-    		        new ArrayList<>(cartasComunes),
-    		        baraja.getCartasRestantes(),
-    		        calcularExacto.isSelected()
-    		    );
-    		
-    		    for (int i = 0; i < jugadores.length; i++) {
-    		        jugadores[i].setEquity(resultados[i]);
-    		    }
-    		
-    		    mensaje.setText("Equity calculado correctamente");*/
-    	   calcularEquity();
-    	   
-       });
+       botonRecalcular.addActionListener(e -> {calcularEquity();});
         botonReiniciar.addActionListener(e -> {reiniciar();
         									   botonRepartirRandom.setEnabled(true);
         									   botonRepartirManual.setEnabled(true);
@@ -254,9 +224,7 @@ public class PokerBoardGui extends JFrame {
         
         botonFlop.setEnabled(false);
 
-        JPanel controles = new JPanel(
-            new FlowLayout(FlowLayout.CENTER, 20, 12)
-        );
+        JPanel controles = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 12));
         
         controles.add(botonRepartirManual);
         controles.add(botonRepartirRandom);
@@ -289,17 +257,13 @@ public class PokerBoardGui extends JFrame {
             label.setText("?");
             label.setForeground(Color.WHITE);
             label.setFont(new Font("Arial", Font.BOLD, 24));
-            label.setBorder(
-                BorderFactory.createLineBorder(Color.WHITE, 2)
-            );
+            label.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
             return;
         }
 
         ImageIcon original = new ImageIcon(recurso);
 
-        Image imagen = original.getImage().getScaledInstance(
-            75, 110, Image.SCALE_SMOOTH
-        );
+        Image imagen = original.getImage().getScaledInstance(75, 110, Image.SCALE_SMOOTH);
 
         label.setText("");
         label.setBorder(null);
@@ -338,21 +302,18 @@ public class PokerBoardGui extends JFrame {
             }
     	}
     	
-    	// Calcular equity inicial y habilitar los botones de fold
-        calcularEquity();
+    	// Habilitar los botones de fold
         for (PlayerPanel panel : jugadores) {
             panel.habilitarFold(true);
         }
-        mensaje.setText("Manos repartidas — equity calculado");
+        mensaje.setText("Manos repartidas correctamente");
     }
 
     private void flop() {
     	if(!repartoManual)
 	    	for (int i = 0; i < 3; i++) {
 	            Carta carta = baraja.repartir();
-	            //
 	            cartasComunes.add(carta);
-	            //
 	            mostrarImagen(
 	                cartasComunitarias[i],
 	                carta.get_carta_PNG()
@@ -383,9 +344,7 @@ public class PokerBoardGui extends JFrame {
     	if(!repartoManual)
 	    	for (int i = 3; i < 4; i++) {
 	            Carta carta = baraja.repartir();
-	            //
 	            cartasComunes.add(carta);
-	            //
 	            mostrarImagen(
 	                cartasComunitarias[i],
 	                carta.get_carta_PNG()
@@ -414,9 +373,7 @@ public class PokerBoardGui extends JFrame {
     	if(!repartoManual)
 	    	for (int i = 4; i < cartasComunitarias.length; i++) {
 	            Carta carta = baraja.repartir();
-	            //
 	            cartasComunes.add(carta);
-	            //
 	            mostrarImagen(
 	                cartasComunitarias[i],
 	                carta.get_carta_PNG()
@@ -461,7 +418,6 @@ public class PokerBoardGui extends JFrame {
         mensaje.setText("Pulsa Repartir para comenzar");
     }
 
-    // Panel independiente para cada jugador.
     private class PlayerPanel extends JPanel {
 
         private final JLabel[] cartas = new JLabel[2];
@@ -477,10 +433,8 @@ public class PokerBoardGui extends JFrame {
         public PlayerPanel(int numero, String nombreJugador) {
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
             setOpaque(false);
-            //
             minombre = nombreJugador;
             yo = new Jugador(minombre, new ArrayList<Carta>());
-            //
             JLabel nombre = new JLabel(
                 minombre,
                 SwingConstants.CENTER
@@ -537,29 +491,16 @@ public class PokerBoardGui extends JFrame {
         }
 
         public void mostrarCarta(int posicion, Carta carta) {
-            mostrarImagen(
-                cartas[posicion],
-                carta.get_carta_PNG()
-            );
-            //
+            mostrarImagen(cartas[posicion],carta.get_carta_PNG());
             yo.addCarta(carta);
-            //
         }
 
         public void setEquity(Double porcentaje) {
             if (porcentaje == null) {
                 equityLabel.setText("Equity: -- %");
             } else {
-                equityLabel.setText(
-                    String.format(
-                        java.util.Locale.ROOT,
-                        "Equity: %.2f%%",
-                        porcentaje
-                    )
-                );
-                //
+                equityLabel.setText(String.format( java.util.Locale.ROOT,"Equity: %.2f%%",porcentaje));
                 yo.setEquity(porcentaje);
-                //
             }
         }
 
@@ -574,7 +515,7 @@ public class PokerBoardGui extends JFrame {
             yo = new Jugador(minombre, new ArrayList<Carta>());
         }
 
-        /** Marca al jugador como foldeado. Muestra feedback visual y lo excluye del equity. */
+        // Marca al jugador como foldeado
         public void fold() {
             activo = false;
             btnFold.setEnabled(false);
@@ -585,9 +526,10 @@ public class PokerBoardGui extends JFrame {
             for (JLabel carta : cartas) {
                 mostrarImagen(carta, "back.png");
             }
+            calcularEquity();
         }
 
-        /** Activa o desactiva el botón FOLD (solo si el jugador sigue activo). */
+        // Activa o desactiva el botón FOLD 
         public void habilitarFold(boolean enabled) {
             if (activo) {
                 btnFold.setEnabled(enabled);
@@ -739,7 +681,6 @@ public class PokerBoardGui extends JFrame {
 	    
 	    if(rangoDado == null) {
 	    	campoRango.setBackground(Color.red);
-	    	//rangoTexto.setText("El rango introducido esta mal ecrito, reviselo.");
 	        return;
 	    }
 			
@@ -879,7 +820,7 @@ public class PokerBoardGui extends JFrame {
 	        calcularExacto.isSelected()
 	    );
 
-	    // Asignar equity solo a los jugadores activos (los foldeados conservan "FOLD")
+	    // Asignar equity solo a los jugadores activos
 	    for (int i = 0; i < indicesActivos.size(); i++) {
 	        jugadores[indicesActivos.get(i)].setEquity(resultados[i]);
 	    }
