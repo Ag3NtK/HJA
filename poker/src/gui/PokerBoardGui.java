@@ -338,9 +338,12 @@ public class PokerBoardGui extends JFrame {
             }
     	}
     	
-    	// El equity queda pendiente de calcular.
-        //calcularEquity();
-        mensaje.setText("Manos repartidas correctamente");
+    	// Calcular equity inicial y habilitar los botones de fold
+        calcularEquity();
+        for (PlayerPanel panel : jugadores) {
+            panel.habilitarFold(true);
+        }
+        mensaje.setText("Manos repartidas — equity calculado");
     }
 
     private void flop() {
@@ -468,6 +471,8 @@ public class PokerBoardGui extends JFrame {
         );
         private Jugador yo;
         private String minombre;
+        private boolean activo = true;
+        private JButton btnFold;
 
         public PlayerPanel(int numero, String nombreJugador) {
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -516,6 +521,19 @@ public class PokerBoardGui extends JFrame {
 
             panelEquity.add(equityLabel, BorderLayout.CENTER);
             add(panelEquity);
+
+            // Botón de Fold
+            btnFold = new JButton("FOLD");
+            btnFold.setBackground(new Color(160, 30, 30));
+            btnFold.setForeground(Color.WHITE);
+            btnFold.setFont(new Font("Arial", Font.BOLD, 13));
+            btnFold.setAlignmentX(Component.CENTER_ALIGNMENT);
+            btnFold.setMaximumSize(new Dimension(160, 28));
+            btnFold.setBorderPainted(false);
+            btnFold.setEnabled(false);
+            btnFold.addActionListener(e -> fold());
+            add(Box.createVerticalStrut(5));
+            add(btnFold);
         }
 
         public void mostrarCarta(int posicion, Carta carta) {
@@ -549,19 +567,43 @@ public class PokerBoardGui extends JFrame {
             for (JLabel carta : cartas) {
                 mostrarImagen(carta, "back.png");
             }
-
+            activo = true;
+            btnFold.setEnabled(false);
+            equityLabel.setForeground(Color.WHITE);
             setEquity(null);
-            //
             yo = new Jugador(minombre, new ArrayList<Carta>());
-            //
         }
-        
+
+        /** Marca al jugador como foldeado. Muestra feedback visual y lo excluye del equity. */
+        public void fold() {
+            activo = false;
+            btnFold.setEnabled(false);
+            // Mostrar "FOLD" con fondo gris en el recuadro de equity
+            equityLabel.setText("FOLD");
+            equityLabel.setForeground(new Color(220, 60, 60));
+            // Voltear las cartas boca abajo
+            for (JLabel carta : cartas) {
+                mostrarImagen(carta, "back.png");
+            }
+        }
+
+        /** Activa o desactiva el botón FOLD (solo si el jugador sigue activo). */
+        public void habilitarFold(boolean enabled) {
+            if (activo) {
+                btnFold.setEnabled(enabled);
+            }
+        }
+
+        public boolean isActivo() {
+            return activo;
+        }
+
         public Jugador getJugador() {
-        	return yo;
+            return yo;
         }
-    
+
         public String getName() {
-        	return minombre;
+            return minombre;
         }
     }
 
@@ -813,24 +855,35 @@ public class PokerBoardGui extends JFrame {
 	}
 	
 	private void calcularEquity() {
-	
-		jugadoresMesa = new ArrayList<>();
-	
-	    for (PlayerPanel panel : jugadores) {
-	        jugadoresMesa.add(panel.getJugador());
+
+	    // Solo incluir en el cálculo los jugadores que no han hecho fold
+	    jugadoresMesa = new ArrayList<>();
+	    ArrayList<Integer> indicesActivos = new ArrayList<>();
+
+	    for (int i = 0; i < jugadores.length; i++) {
+	        if (jugadores[i].isActivo()) {
+	            jugadoresMesa.add(jugadores[i].getJugador());
+	            indicesActivos.add(i);
+	        }
 	    }
-	
+
+	    if (jugadoresMesa.isEmpty()) {
+	        mensaje.setText("No hay jugadores activos en la mano");
+	        return;
+	    }
+
 	    double[] resultados = CalculadoraEquity.calcularAuto(
 	        jugadoresMesa,
 	        new ArrayList<>(cartasComunes),
 	        baraja.getCartasRestantes(),
 	        calcularExacto.isSelected()
 	    );
-	
-	    for (int i = 0; i < jugadores.length; i++) {
-	        jugadores[i].setEquity(resultados[i]);
+
+	    // Asignar equity solo a los jugadores activos (los foldeados conservan "FOLD")
+	    for (int i = 0; i < indicesActivos.size(); i++) {
+	        jugadores[indicesActivos.get(i)].setEquity(resultados[i]);
 	    }
-	
+
 	    mensaje.setText("Equity calculado correctamente");
 	}
 
