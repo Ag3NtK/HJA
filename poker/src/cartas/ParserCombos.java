@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 public class ParserCombos {
 	
@@ -31,7 +32,7 @@ public class ParserCombos {
 		}
 	}
 	
-	public static ArrayList<String> parsearDevolverCombos(String texto, JTextArea comentario){
+	public static ArrayList<String> parsearDevolverCombos(String texto, JTextField ranguito){
 		Rank valor1;
 		Rank valor2;
 		ArrayList<String> combosTexto = Arrays.stream(texto.split(","))
@@ -120,7 +121,7 @@ public class ParserCombos {
 				}else
 					throw new IllegalArgumentException("Combo mal construido: " + combo);
 			} catch (Exception e) {
-				comentario.setText(e.getMessage());
+				ranguito.setText(e.getMessage());
 				return null;
 			}
 		}

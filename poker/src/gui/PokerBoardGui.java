@@ -2,6 +2,9 @@ package gui;
 
 import javax.swing.*;
 
+import com.sun.source.tree.DoWhileLoopTree;
+import com.sun.source.tree.WhileLoopTree;
+
 import cartas.Baraja;
 import cartas.Carta;
 import cartas.Jugador;
@@ -10,6 +13,8 @@ import cartas.ParserCombos;
 import java.awt.*;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.concurrent.ForkJoinPool;
 
 public class PokerBoardGui extends JFrame {
 
@@ -34,8 +39,8 @@ public class PokerBoardGui extends JFrame {
     private JTextField campoRango;
     private JTextField selectorPorcentaje;
     ArrayList<Jugador> jugadoresMesa;
-    private JTextArea rangoTexto;
-    private JTextArea rankingTexto;
+
+    
 
     private static final String[] RANKING_SKLANSKY_CHUBUKOV = {
     	    "AA", "KK", "QQ", "JJ", "TT", "99", "88", "77", "66",
@@ -66,6 +71,14 @@ public class PokerBoardGui extends JFrame {
         "Pulsa Repartir para comenzar",
         SwingConstants.CENTER
     );
+ // En PokerBoardGui:
+    private void calcularRanguitos() {
+        for (PlayerPanel panel : jugadores) {
+            if (panel.isActivo()) {
+                actualizarRango(panel.getRanguito(), panel.getJugador());
+            }
+        }
+    }
     
     public static void main(String[] args) {
 		SwingUtilities.invokeLater(() -> {
@@ -170,7 +183,7 @@ public class PokerBoardGui extends JFrame {
         add(mesa, BorderLayout.CENTER);
         
         // Panel de los rangos
-        add(crearPanelRangos(), BorderLayout.EAST);
+//        add(crearPanelRangos(), BorderLayout.EAST);
         setSize(1450, 850);
         setMinimumSize(new Dimension(1200, 750));
 
@@ -189,6 +202,7 @@ public class PokerBoardGui extends JFrame {
         											botonRepartirManual.setEnabled(false);
         											botonRepartirRandom.setEnabled(false);
         											repartirCartas();
+        											calcularRanguitos();
         											botonRecalcular.setEnabled(true);});
         botonRepartirRandom.addActionListener(e -> {botonFlop.setEnabled(true);
         									  		botonRepartirRandom.setEnabled(false);
@@ -224,6 +238,8 @@ public class PokerBoardGui extends JFrame {
         
         botonFlop.setEnabled(false);
 
+        calcularExacto = new JCheckBox("Calcular Equity exacto para preflop? Default : Estimación", false);
+
         JPanel controles = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 12));
         
         controles.add(botonRepartirManual);
@@ -232,6 +248,7 @@ public class PokerBoardGui extends JFrame {
         controles.add(botonReiniciar);
         controles.add(botonRecalcular);
         controles.add(mensaje);
+        controles.add(calcularExacto, gbc);
 
         add(controles, BorderLayout.SOUTH);
 
@@ -425,6 +442,9 @@ public class PokerBoardGui extends JFrame {
             "Equity: -- %",
             SwingConstants.CENTER
         );
+        private JTextField ranguito;
+        private JTextField em;
+
         private Jugador yo;
         private String minombre;
         private boolean activo = true;
@@ -476,6 +496,23 @@ public class PokerBoardGui extends JFrame {
             panelEquity.add(equityLabel, BorderLayout.CENTER);
             add(panelEquity);
 
+            //rango jugador
+            ranguito= new JTextField();
+            ranguito.setBackground(new Color(15, 75, 48));
+            ranguito.setMaximumSize(new Dimension(180, 45));
+            ranguito.setPreferredSize(new Dimension(160, 45));
+            ranguito.setForeground(Color.WHITE);
+            
+            add(ranguito);
+            //em jugador
+            em = new JTextField();
+            em.setBackground(new Color(15, 75, 48));
+          	em.setMaximumSize(new Dimension(180, 45));
+          	em.setPreferredSize(new Dimension(160, 45));
+          	em.setForeground(Color.WHITE);
+            add(em);
+            
+            
             // Botón de Fold
             btnFold = new JButton("FOLD");
             btnFold.setBackground(new Color(160, 30, 30));
@@ -488,6 +525,14 @@ public class PokerBoardGui extends JFrame {
             btnFold.addActionListener(e -> fold());
             add(Box.createVerticalStrut(5));
             add(btnFold);
+        }
+        public JTextField getRanguito() {
+            return ranguito;
+        }
+		public void calcularRanguitos() {
+        	for (int i = 0; i < jugadores.length; i++) {
+				actualizarRango(ranguito,jugadores[i].getJugador() );
+			}
         }
 
         public void mostrarCarta(int posicion, Carta carta) {
@@ -549,157 +594,142 @@ public class PokerBoardGui extends JFrame {
         }
     }
 
-	private JPanel crearPanelRangos() {
-	    JPanel panel = new JPanel(new GridBagLayout());
-	    panel.setBorder(
-	        BorderFactory.createTitledBorder("Rango del Hero")
-	    );
+//	private JPanel crearPanelRangos() {
+//	    JPanel panel = new JPanel(new GridBagLayout());
+//	    panel.setBorder(
+//	        BorderFactory.createTitledBorder("Rango del Hero")
+//	    );
+//	
+//	    GridBagConstraints gbc = new GridBagConstraints();
+//	    gbc.insets = new Insets(7, 8, 5, 8);
+//	    gbc.fill = GridBagConstraints.HORIZONTAL;
+//	    gbc.weightx = 1.0;
+//	
+//	    modoTexto = new JCheckBox("Introducir rango textual", true);
+//	 	    modoPorcentaje = new JCheckBox("Seleccionar por porcentaje");
+//	
+//	    campoRango = new JTextField();
+//	
+//	    selectorPorcentaje = new JTextField(5);
+//	    
+//	    rankingTexto = new JTextArea(3, 30);
+//	    rankingTexto.setEditable(false);
+//	    rankingTexto.setLineWrap(true);
+//	    rankingTexto.setWrapStyleWord(true);
+//	    
+//	    rangoTexto = new JTextArea(3, 30);
+//	    rangoTexto.setEditable(false);
+//	    rangoTexto.setLineWrap(true);
+//	    rangoTexto.setWrapStyleWord(true);
+//	    
+//	    // Fila 1: rango textual.
+//	    gbc.gridx = 0;
+//	    gbc.gridy = 0;
+//	    gbc.gridwidth = 2;
+//	    panel.add(modoTexto, gbc);
+//	    
+//	    //
+//	    gbc.gridy = 1;
+//	    panel.add(campoRango, gbc);
+//	    //
+//	    
+//	    gbc.gridy = 2;
+//
+//	    JScrollPane scrollRango = new JScrollPane(rangoTexto);
+//	    scrollRango.setPreferredSize(new Dimension(250, 70));
+//	    panel.add(scrollRango, gbc);
+//	
+//	    // Fila 2: rango por porcentaje.
+//	    gbc.gridy = 3;
+//	    panel.add(modoPorcentaje, gbc);
+//	
+//	    gbc.gridy = 4;
+//	    gbc.gridwidth = 1;
+//	    panel.add(new JLabel("Porcentaje del ranking:"), gbc);
+//	
+//	    gbc.gridx = 1;
+//	    panel.add(selectorPorcentaje, gbc);
+//	    //
+//	    gbc.gridx = 0;
+//	    gbc.gridy = 5;
+//	    gbc.gridwidth = 2;
+//
+//	    JScrollPane scrollRanking = new JScrollPane(rankingTexto);
+//	    scrollRanking.setPreferredSize(new Dimension(250, 70));
+//	    panel.add(scrollRanking, gbc);
+//	    //
+//	    gbc.gridx = 0;
+//	    gbc.gridy = 6;
+//	    gbc.gridwidth = 2;
+//	    
+//	    
+//	    // Exclusión mutua entre los dos modos.
+//	    modoTexto.addActionListener(e -> {
+//	        if (modoTexto.isSelected()) {
+//	            modoPorcentaje.setSelected(false);
+//	        } else if (!modoPorcentaje.isSelected()) {
+//	            modoTexto.setSelected(true);
+//	        }
+////	        actualizarModoRango();
+//	    });
+//	
+//	    modoPorcentaje.addActionListener(e -> {
+//	        if (modoPorcentaje.isSelected()) {
+//	            modoTexto.setSelected(false);
+//	        } else if (!modoTexto.isSelected()) {
+//	            modoPorcentaje.setSelected(true);
+//	        }
+////	        actualizarModoRango();
+//	    });
 	
-	    GridBagConstraints gbc = new GridBagConstraints();
-	    gbc.insets = new Insets(7, 8, 5, 8);
-	    gbc.fill = GridBagConstraints.HORIZONTAL;
-	    gbc.weightx = 1.0;
+//	    selectorPorcentaje.addActionListener(e -> actualizarRanking());
+//	    campoRango.addActionListener(e -> actualizarRango());
+//	
+//	    actualizarModoRango();
+//	    actualizarRanking();
+//	    actualizarRango();
+//	
+//	    return panel;
+//	}
 	
-	    modoTexto = new JCheckBox("Introducir rango textual", true);
-	    calcularExacto = new JCheckBox("Calcular Equity exacto para preflop? Default : Estimación", false);
-	    modoPorcentaje = new JCheckBox("Seleccionar por porcentaje");
 	
-	    campoRango = new JTextField();
 	
-	    selectorPorcentaje = new JTextField(5);
-	    
-	    rankingTexto = new JTextArea(3, 30);
-	    rankingTexto.setEditable(false);
-	    rankingTexto.setLineWrap(true);
-	    rankingTexto.setWrapStyleWord(true);
-	    
-	    rangoTexto = new JTextArea(3, 30);
-	    rangoTexto.setEditable(false);
-	    rangoTexto.setLineWrap(true);
-	    rangoTexto.setWrapStyleWord(true);
-	    
-	    // Fila 1: rango textual.
-	    gbc.gridx = 0;
-	    gbc.gridy = 0;
-	    gbc.gridwidth = 2;
-	    panel.add(modoTexto, gbc);
-	    
-	    //
-	    gbc.gridy = 1;
-	    panel.add(campoRango, gbc);
-	    //
-	    
-	    gbc.gridy = 2;
-
-	    JScrollPane scrollRango = new JScrollPane(rangoTexto);
-	    scrollRango.setPreferredSize(new Dimension(250, 70));
-	    panel.add(scrollRango, gbc);
-	
-	    // Fila 2: rango por porcentaje.
-	    gbc.gridy = 3;
-	    panel.add(modoPorcentaje, gbc);
-	
-	    gbc.gridy = 4;
-	    gbc.gridwidth = 1;
-	    panel.add(new JLabel("Porcentaje del ranking:"), gbc);
-	
-	    gbc.gridx = 1;
-	    panel.add(selectorPorcentaje, gbc);
-	    //
-	    gbc.gridx = 0;
-	    gbc.gridy = 5;
-	    gbc.gridwidth = 2;
-
-	    JScrollPane scrollRanking = new JScrollPane(rankingTexto);
-	    scrollRanking.setPreferredSize(new Dimension(250, 70));
-	    panel.add(scrollRanking, gbc);
-	    //
-	    gbc.gridx = 0;
-	    gbc.gridy = 6;
-	    gbc.gridwidth = 2;
-	    panel.add(calcularExacto, gbc);
-	    
-	    // Exclusión mutua entre los dos modos.
-	    modoTexto.addActionListener(e -> {
-	        if (modoTexto.isSelected()) {
-	            modoPorcentaje.setSelected(false);
-	        } else if (!modoPorcentaje.isSelected()) {
-	            modoTexto.setSelected(true);
-	        }
-	        actualizarModoRango();
-	    });
-	
-	    modoPorcentaje.addActionListener(e -> {
-	        if (modoPorcentaje.isSelected()) {
-	            modoTexto.setSelected(false);
-	        } else if (!modoTexto.isSelected()) {
-	            modoPorcentaje.setSelected(true);
-	        }
-	        actualizarModoRango();
-	    });
-	
-	    selectorPorcentaje.addActionListener(e -> actualizarRanking());
-	    campoRango.addActionListener(e -> actualizarRango());
-	
-	    actualizarModoRango();
-	    actualizarRanking();
-	    actualizarRango();
-	
-	    return panel;
-	}
-	
-	private void actualizarModoRango() {
-	    boolean textoActivo = modoTexto.isSelected();
-	
-	    campoRango.setEnabled(textoActivo);
-	    rangoTexto.setEnabled(textoActivo);
-	    selectorPorcentaje.setEnabled(!textoActivo);
-	    rankingTexto.setEnabled(!textoActivo);
-	}
-	
-	private void actualizarRango() {
-		String texto = campoRango.getText();
+	private void actualizarRango(JTextField ranguito,Jugador player) {
+		String texto = ranguito.getText();
 		ArrayList<String> rangoDado;
 
 	    // Evitar errores si el campo está vacío.
 	    if (texto.isEmpty()) {
-	    	campoRango.setBackground(Color.WHITE);
-	    	rangoTexto.setText("Introduce un rango.");
+	    	ranguito.setBackground(Color.WHITE);
+	    	ranguito.setText("Introduce un rango");
 	        return;
 	    }	    
 	    
-	    campoRango.setBackground(Color.WHITE);
-	    Jugador hero = jugadores[3].getJugador();
+	  
 	    
-	    if (hero == null || hero.getCombo() == null) {
-	    	campoRango.setBackground(Color.WHITE);
-	        rangoTexto.setText("Reparte las dos cartas del Hero primero.");
-	        return;
-	    }
-	    
-	    rangoDado = ParserCombos.parsearDevolverCombos(texto, rangoTexto);
+	    rangoDado = ParserCombos.parsearDevolverCombos(texto, ranguito);
 	    
 	    if(rangoDado == null) {
-	    	campoRango.setBackground(Color.red);
+	    	ranguito.setBackground(Color.red);
 	        return;
 	    }
 			
 		boolean enRango = false;
 		
 		for(int i = 0; i < rangoDado.size();i++) {
-			if(hero.getCombo().equals(rangoDado.get(i))) {
+			if(player.getCombo().equals(rangoDado.get(i))) {
 				enRango = true;
 				break;
 			}
 		}
 		
 		if(enRango) {
-			campoRango.setBackground(Color.green);
-			rangoTexto.setText("Tus cartas estan dentro del rango.");
+			ranguito.setBackground(Color.green);
+			
 		}
 		else {
-			campoRango.setBackground(Color.red);
-			rangoTexto.setText("Tus cartas estan fuera del rango.");
+			ranguito.setBackground(Color.red);
+			
 		}
 	}
 	
@@ -709,7 +739,7 @@ public class PokerBoardGui extends JFrame {
 	    // Evitar errores si el campo está vacío o no contiene un número.
 	    if (texto.isEmpty()) {
 	        selectorPorcentaje.setBackground(Color.WHITE);
-	        rankingTexto.setText("Introduce un porcentaje entre 0 y 100.");
+	      
 	        return;
 	    }
 
@@ -719,13 +749,13 @@ public class PokerBoardGui extends JFrame {
 	        numero = Integer.parseInt(texto);
 	    } catch (NumberFormatException e) {
 	        selectorPorcentaje.setBackground(Color.RED);
-	        rankingTexto.setText("El porcentaje debe ser un número entero.");
+	 
 	        return;
 	    }
 
 	    if (numero < 0 || numero > 100) {
 	        selectorPorcentaje.setBackground(Color.RED);
-	        rankingTexto.setText("El porcentaje debe estar entre 0 y 100.");
+
 	        return;
 	    }
 
@@ -738,7 +768,7 @@ public class PokerBoardGui extends JFrame {
 	    
 	    if (hero == null || hero.getCombo() == null) {
 	        selectorPorcentaje.setBackground(Color.WHITE);
-	        rankingTexto.setText("Reparte las dos cartas del Hero primero.");
+
 	        return;
 	    }
 			
@@ -753,11 +783,11 @@ public class PokerBoardGui extends JFrame {
 		
 		if(enRango) {
 			selectorPorcentaje.setBackground(Color.green);
-			rankingTexto.setText("Tus cartas estan dentro del rango.");
+
 		}
 		else {
 			selectorPorcentaje.setBackground(Color.red);
-			rankingTexto.setText("Tus cartas estan fuera del rango.");
+
 		}
 	    
 	}
