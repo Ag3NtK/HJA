@@ -13,6 +13,7 @@ public class Jugador implements Comparable<Jugador> {
     public Jugador(String id, ArrayList<Carta> cartasPropias) {
         this.id = id;
         this.cartasPropias = cartasPropias;
+        this.Equity = -1.0;
     }
 
     public String getId() {
