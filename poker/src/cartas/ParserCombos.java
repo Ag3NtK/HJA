@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 public class ParserCombos {
@@ -40,6 +39,8 @@ public class ParserCombos {
                 .filter(item -> !item.isEmpty())   
                 .collect(Collectors.toCollection(ArrayList::new));
 		ArrayList<String> listaCombos = new ArrayList<String>();
+		
+		
 		
 		for(String combo : combosTexto) {
 			try {
@@ -122,6 +123,7 @@ public class ParserCombos {
 					throw new IllegalArgumentException("Combo mal construido: " + combo);
 			} catch (Exception e) {
 				ranguito.setText(e.getMessage());
+				
 				return null;
 			}
 		}

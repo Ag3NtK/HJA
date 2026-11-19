@@ -2,19 +2,16 @@ package gui;
 
 import javax.swing.*;
 
-import com.sun.source.tree.DoWhileLoopTree;
-import com.sun.source.tree.WhileLoopTree;
-
 import cartas.Baraja;
 import cartas.Carta;
 import cartas.Jugador;
 import cartas.ParserCombos;
 
 import java.awt.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.concurrent.ForkJoinPool;
 
 public class PokerBoardGui extends JFrame {
 
@@ -28,6 +25,7 @@ public class PokerBoardGui extends JFrame {
     private JButton botonFlop;
     private JButton botonRecalcular;
     private String stage = "preflop"; 
+    private boolean borrartodos=false;
     
     private boolean repartoManual = false;
     private ArrayList<Carta> cartasComunes = new ArrayList<Carta>();
@@ -72,19 +70,29 @@ public class PokerBoardGui extends JFrame {
         SwingConstants.CENTER
     );
     // En PokerBoardGui:
-    private void calcularRanguitos() {
+    private boolean calcularRanguitos() {
+    	boolean aux = true;
         for (PlayerPanel panel : jugadores) {
             if (panel.isActivo()) {
-                actualizarRango(panel.getRanguito(), panel.getJugador());
+                if(!actualizarRango(panel.getRanguito(), panel.getJugador())) {
+                	aux = false;
+                	panel.getRanguito().setBackground(Color.BLUE);
+                }
             }
         }
+        return aux;
     }
-    private void calcularEms() {
+    private boolean calcularEms() {
+    	boolean aux = true;
         for (PlayerPanel panel : jugadores) {
             if (panel.isActivo()) {
-                panel.enEquity();
+                if(!panel.enEquity()) {
+                	aux = false;
+                	panel.getEm().setBackground(Color.BLUE);
+                }
             }
         }
+        return aux;
     }
     
     public static void main(String[] args) {
@@ -217,6 +225,11 @@ public class PokerBoardGui extends JFrame {
         									  		repartirCartas();
         									  		botonRecalcular.setEnabled(true);});
         botonFlop.addActionListener(e -> {
+        	boolean entrar = !calcularRanguitos();
+        	boolean entrar2 = !calcularEms();
+        	if(entrar || entrar2) {
+        		return;
+        	}
             switch (stage) {
                 case "preflop":
                     stage = "flop";
@@ -535,7 +548,30 @@ public class PokerBoardGui extends JFrame {
             ranguito.setBackground(new Color(15, 75, 48));
             ranguito.setPreferredSize(new Dimension(100, 35));
             ranguito.setForeground(Color.WHITE);
-
+            ranguito.addFocusListener(new FocusListener() {
+    			
+    			@Override
+    			public void focusLost(FocusEvent fe) {
+    				if(ranguito.getText().isEmpty())
+    					ranguito.setText("Introduce un rango");
+    			}
+    			
+    			@Override
+    			public void focusGained(FocusEvent e) {
+    				if(!borrartodos) {
+	    				if(ranguito.getText().contentEquals("Introduce un rango"))
+	    					ranguito.setText("");
+	    				ranguito.setBackground(new Color(15, 75, 48));
+	    				}
+    				else
+    				{
+    					ranguito.setText("");
+        				ranguito.setBackground(new Color(15, 75, 48));
+        				borrartodos=false;
+    				}
+    			}
+    		});
+            
             panelRango.add(labelRango);
             panelRango.add(ranguito);
 
@@ -558,7 +594,21 @@ public class PokerBoardGui extends JFrame {
             em.setBackground(new Color(15, 75, 48));
             em.setPreferredSize(new Dimension(100, 35));
             em.setForeground(Color.WHITE);
-
+            em.addFocusListener(new FocusListener() {
+    			
+    			@Override
+    			public void focusLost(FocusEvent fe) {
+    				if(em.getText().isEmpty())
+    					em.setText("Introduce un Equity");
+    			}
+    			
+    			@Override
+    			public void focusGained(FocusEvent e) {
+    				if(em.getText().contentEquals("Introduce un Equity"))
+    					em.setText("");
+    				em.setBackground(new Color(15, 75, 48));
+    			}
+    		});
             panelEm.add(labelEm);
             panelEm.add(em);
 
@@ -582,6 +632,9 @@ public class PokerBoardGui extends JFrame {
         public JTextField getRanguito() {
             return ranguito;
         }
+        public JTextField getEm() {
+        	return em;
+        }
         /*
 		public void calcularRanguitos() {
         	for (int i = 0; i < jugadores.length; i++) {
@@ -589,10 +642,10 @@ public class PokerBoardGui extends JFrame {
 			}
         }*/
         
-        public void enEquity() {
+        public boolean enEquity() {
         	
         	if(yo.getEquity() == -1.0) {
-        		return;
+        		return false;
         	}
         	
         	String aux = em.getText();
@@ -601,13 +654,14 @@ public class PokerBoardGui extends JFrame {
         	try {
 		        numero = Double.parseDouble(aux);
 		    } catch (NumberFormatException e) {
-		        return;
+		        return false;
 		    }
         	if(yo.getEquity() >= numero) {
         		em.setBackground(Color.green);
         	}else {
         		em.setBackground(Color.red);
         	}
+        	return true;
         }
         
         public void mostrarCarta(int posicion, Carta carta) {
@@ -632,13 +686,13 @@ public class PokerBoardGui extends JFrame {
             btnFold.setEnabled(false);
             equityText.setForeground(Color.WHITE);
             setEquity(null);
-            em.setText("");
+            em.setText("Introduce un Equity");
             em.setBackground(new Color(15, 75, 48));
-            ranguito.setText("");
+            ranguito.setText("Introduce un rango");
             ranguito.setBackground(new Color(15, 75, 48));
             yo = new Jugador(minombre, new ArrayList<Carta>());
         }
-
+        
         // Marca al jugador como foldeado
         public void fold() {
             activo = false;
@@ -679,6 +733,10 @@ public class PokerBoardGui extends JFrame {
         public String getName() {
             return minombre;
         }
+    }
+
+    public void setborrartodos() {
+    	borrartodos=true;
     }
 
 //	private JPanel crearPanelRangos() {
@@ -781,7 +839,7 @@ public class PokerBoardGui extends JFrame {
 	
 	
 	
-	private void actualizarRango(JTextField ranguito,Jugador player) {
+	private boolean actualizarRango(JTextField ranguito,Jugador player) {
 		String texto = ranguito.getText();
 		ArrayList<String> rangoDado;
 
@@ -789,21 +847,24 @@ public class PokerBoardGui extends JFrame {
 	    if (texto.isEmpty()) {
 	    	ranguito.setBackground(new Color(15, 75, 48));
 	    	ranguito.setText("Introduce un rango");
-	        return;
+	    	setborrartodos();
+	        return false;
 	    }
 	    
 	    if(texto.length() < 2) {
 	    	ranguito.setBackground(Color.red);
 	    	ranguito.setText("Rango incorrecto");
-	        return;
+	    	setborrartodos();
+	        return false;
 	    }
 	    
 	    if(texto.length() == 2 || texto.charAt(2) != '%') {
 		    rangoDado = ParserCombos.parsearDevolverCombos(texto, ranguito);
 		    
 		    if(rangoDado == null || player.getCombo() == null) {
-		    	ranguito.setBackground(new Color(15, 75, 48));
-		        return;
+		    	//ranguito.setBackground(new Color(15, 75, 48));
+		    	setborrartodos();
+		        return false;
 		    }
 				
 			boolean enRango = false;
@@ -829,15 +890,15 @@ public class PokerBoardGui extends JFrame {
 		    try {
 		        numero = Integer.parseInt(texto);
 		    } catch (NumberFormatException e) {
-		        ranguito.setBackground(Color.RED);
+		        //ranguito.setBackground(Color.RED);
 		 
-		        return;
+		        return false;
 		    }
 
 		    if (numero < 0 || numero > 100) {
-		    	ranguito.setBackground(Color.RED);
+		    	//ranguito.setBackground(Color.RED);
 
-		        return;
+		        return false;
 		    }
 
 		    int cantidadManos = (int) Math.ceil(
@@ -847,9 +908,9 @@ public class PokerBoardGui extends JFrame {
 		    ranguito.setBackground(new Color(15, 75, 48));
 		    
 		    if (player.getCombo() == null) {
-		    	ranguito.setBackground(new Color(15, 75, 48));
+		    	//ranguito.setBackground(new Color(15, 75, 48));
 
-		        return;
+		        return false;
 		    }
 				
 			boolean enRango = false;
@@ -869,7 +930,9 @@ public class PokerBoardGui extends JFrame {
 				ranguito.setBackground(Color.red);
 
 			}
+			
 		}
+	    return true;
 	}
 	
 	private void actualizarRanking() {
