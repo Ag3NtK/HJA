@@ -25,7 +25,7 @@ public class PokerBoardGui extends JFrame {
     private JButton botonFlop;
     private JButton botonRecalcular;
     private String stage = "preflop"; 
-    private boolean borrartodos=false;
+    
     
     private boolean repartoManual = false;
     private ArrayList<Carta> cartasComunes = new ArrayList<Carta>();
@@ -69,12 +69,12 @@ public class PokerBoardGui extends JFrame {
         "Pulsa Repartir para comenzar",
         SwingConstants.CENTER
     );
-    // En PokerBoardGui:
+    
     private boolean calcularRanguitos() {
     	boolean aux = true;
         for (PlayerPanel panel : jugadores) {
             if (panel.isActivo()) {
-                if(!actualizarRango(panel.getRanguito(), panel.getJugador())) {
+                if(!actualizarRango(panel)) {
                 	aux = false;
                 	panel.getRanguito().setBackground(Color.BLUE);
                 }
@@ -82,6 +82,7 @@ public class PokerBoardGui extends JFrame {
         }
         return aux;
     }
+    
     private boolean calcularEms() {
     	boolean aux = true;
         for (PlayerPanel panel : jugadores) {
@@ -230,6 +231,7 @@ public class PokerBoardGui extends JFrame {
         	if(entrar || entrar2) {
         		return;
         	}
+        	continuanJugando();
             switch (stage) {
                 case "preflop":
                     stage = "flop";
@@ -246,6 +248,7 @@ public class PokerBoardGui extends JFrame {
                 default:
                     break;
             }
+            calcularEms();
         });
         
        
@@ -461,6 +464,8 @@ public class PokerBoardGui extends JFrame {
         private final JTextField equityText;
         private JTextField ranguito;
         private JTextField em;
+        private JCheckBox manual;
+        private boolean borrartodos=false;
 
         private Jugador yo;
         private String minombre;
@@ -476,12 +481,18 @@ public class PokerBoardGui extends JFrame {
                 minombre,
                 SwingConstants.CENTER
             );
-
+            
             nombre.setFont(new Font("Arial", Font.BOLD, 17));
             nombre.setForeground(Color.WHITE);
             nombre.setAlignmentX(Component.CENTER_ALIGNMENT);
 
             add(nombre);
+            //se añade la checkbox
+            manual = new JCheckBox("Manual?", false);
+            manual.setBackground(new Color(20, 105, 65));
+            manual.setForeground(Color.black);
+            add(manual);
+            
             add(Box.createVerticalStrut(8));
 
             JPanel panelCartas = new JPanel(
@@ -562,7 +573,7 @@ public class PokerBoardGui extends JFrame {
 	    				if(ranguito.getText().contentEquals("Introduce un rango"))
 	    					ranguito.setText("");
 	    				ranguito.setBackground(new Color(15, 75, 48));
-	    				}
+    				}
     				else
     				{
     					ranguito.setText("");
@@ -626,21 +637,21 @@ public class PokerBoardGui extends JFrame {
             add(Box.createVerticalStrut(5));
             add(btnFold);
             
-            ranguito.addActionListener(e -> actualizarRango(ranguito, yo));
+            ranguito.addActionListener(e -> actualizarRango(this));
             em.addActionListener(e -> enEquity());
         }
+        
         public JTextField getRanguito() {
             return ranguito;
         }
+        
         public JTextField getEm() {
         	return em;
         }
-        /*
-		public void calcularRanguitos() {
-        	for (int i = 0; i < jugadores.length; i++) {
-				actualizarRango(ranguito,jugadores[i].getJugador() );
-			}
-        }*/
+        
+        public boolean getManual() {
+        	return manual.isSelected();
+        }
         
         public boolean enEquity() {
         	
@@ -690,6 +701,7 @@ public class PokerBoardGui extends JFrame {
             em.setBackground(new Color(15, 75, 48));
             ranguito.setText("Introduce un rango");
             ranguito.setBackground(new Color(15, 75, 48));
+            manual.setSelected(false);
             yo = new Jugador(minombre, new ArrayList<Carta>());
         }
         
@@ -733,11 +745,13 @@ public class PokerBoardGui extends JFrame {
         public String getName() {
             return minombre;
         }
+        
+        public void setborrartodos() {
+        	borrartodos=true;
+        }
     }
 
-    public void setborrartodos() {
-    	borrartodos=true;
-    }
+    
 
 //	private JPanel crearPanelRangos() {
 //	    JPanel panel = new JPanel(new GridBagLayout());
@@ -839,48 +853,48 @@ public class PokerBoardGui extends JFrame {
 	
 	
 	
-	private boolean actualizarRango(JTextField ranguito,Jugador player) {
-		String texto = ranguito.getText();
+	private boolean actualizarRango(PlayerPanel panel) {
+		String texto = panel.getRanguito().getText();
 		ArrayList<String> rangoDado;
 
 	    // Evitar errores si el campo está vacío.
 	    if (texto.isEmpty()) {
-	    	ranguito.setBackground(new Color(15, 75, 48));
-	    	ranguito.setText("Introduce un rango");
-	    	setborrartodos();
+	    	panel.getRanguito().setBackground(new Color(15, 75, 48));
+	    	panel.getRanguito().setText("Introduce un rango");
+	    	panel.setborrartodos();
 	        return false;
 	    }
 	    
 	    if(texto.length() < 2) {
-	    	ranguito.setBackground(Color.red);
-	    	ranguito.setText("Rango incorrecto");
-	    	setborrartodos();
+	    	panel.getRanguito().setBackground(Color.red);
+	    	panel.getRanguito().setText("Rango incorrecto");
+	    	panel.setborrartodos();
 	        return false;
 	    }
 	    
 	    if(texto.length() == 2 || texto.charAt(2) != '%') {
-		    rangoDado = ParserCombos.parsearDevolverCombos(texto, ranguito);
+		    rangoDado = ParserCombos.parsearDevolverCombos(texto, panel.getRanguito());
 		    
-		    if(rangoDado == null || player.getCombo() == null) {
+		    if(rangoDado == null || panel.getJugador().getCombo() == null) {
 		    	//ranguito.setBackground(new Color(15, 75, 48));
-		    	setborrartodos();
+		    	panel.setborrartodos();
 		        return false;
 		    }
 				
 			boolean enRango = false;
 			
 			for(int i = 0; i < rangoDado.size();i++) {
-				if(player.getCombo().equals(rangoDado.get(i))) {
+				if(panel.getJugador().getCombo().equals(rangoDado.get(i))) {
 					enRango = true;
 					break;
 				}
 			}
 			
 			if(enRango) {
-				ranguito.setBackground(Color.green);
+				panel.getRanguito().setBackground(Color.green);
 			}
 			else {
-				ranguito.setBackground(Color.red);
+				panel.getRanguito().setBackground(Color.red);
 			}
 			
 		}else {
@@ -897,7 +911,7 @@ public class PokerBoardGui extends JFrame {
 
 		    if (numero < 0 || numero > 100) {
 		    	//ranguito.setBackground(Color.RED);
-
+		    	
 		        return false;
 		    }
 
@@ -905,29 +919,29 @@ public class PokerBoardGui extends JFrame {
 		        RANKING_SKLANSKY_CHUBUKOV.length * numero / 100.0
 		    );
 
-		    ranguito.setBackground(new Color(15, 75, 48));
+		    panel.getRanguito().setBackground(new Color(15, 75, 48));
 		    
-		    if (player.getCombo() == null) {
+		    if (panel.getJugador().getCombo() == null) {
 		    	//ranguito.setBackground(new Color(15, 75, 48));
-
+		    	panel.setborrartodos();
 		        return false;
 		    }
 				
 			boolean enRango = false;
 			
 			for(int i = 0; i < cantidadManos;i++) {
-				if(player.getCombo().equals(RANKING_SKLANSKY_CHUBUKOV[i])) {
+				if(panel.getJugador().getCombo().equals(RANKING_SKLANSKY_CHUBUKOV[i])) {
 					enRango = true;
 					break;
 				}
 			}
 			
 			if(enRango) {
-				ranguito.setBackground(Color.green);
+				panel.getRanguito().setBackground(Color.green);
 
 			}
 			else {
-				ranguito.setBackground(Color.red);
+				panel.getRanguito().setBackground(Color.red);
 
 			}
 			
@@ -1027,4 +1041,18 @@ public class PokerBoardGui extends JFrame {
 	    mensaje.setText("Equity calculado correctamente");
 	}
 
+	public void continuanJugando() {
+		for (PlayerPanel panel : jugadores) {
+            if (panel.isActivo()) {
+            	if(panel.getManual()) {
+            		//crear pop up para preguntar que hacer
+            		
+            		
+            	}else
+            		if(panel.getEm().getBackground() == Color.red || panel.getRanguito().getBackground() == Color.red) {
+            			panel.fold();
+            		}	
+            }
+        }
+	}
 }
