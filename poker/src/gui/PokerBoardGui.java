@@ -24,7 +24,9 @@ public class PokerBoardGui extends JFrame {
     private JButton botonReiniciar;
     private JButton botonFlop;
     private JButton botonRecalcular;
+    private JButton botonCalcRanyEm;
     private String stage = "preflop"; 
+    private boolean apuesta = false;
     
     
     private boolean repartoManual = false;
@@ -211,18 +213,22 @@ public class PokerBoardGui extends JFrame {
         botonFlop.setEnabled(false);
         botonRecalcular = new JButton("Calcular Equity");
         botonRecalcular.setEnabled(false);
+        botonCalcRanyEm = new JButton("Calcular Rang y Em");
+        botonCalcRanyEm.setEnabled(false);
         
 
         botonRepartirManual.addActionListener(e -> {repartoManual = true;
         											botonFlop.setEnabled(true);
         											botonRepartirManual.setEnabled(false);
         											botonRepartirRandom.setEnabled(false);
+        											botonCalcRanyEm.setEnabled(true);
         											repartirCartas();
         											//calcularRanguitos();
         											botonRecalcular.setEnabled(true);});
         botonRepartirRandom.addActionListener(e -> {botonFlop.setEnabled(true);
         									  		botonRepartirRandom.setEnabled(false);
         									  		botonRepartirManual.setEnabled(false);
+        									  		botonCalcRanyEm.setEnabled(true);
         									  		repartirCartas();
         									  		botonRecalcular.setEnabled(true);});
         botonFlop.addActionListener(e -> {
@@ -249,6 +255,7 @@ public class PokerBoardGui extends JFrame {
                     break;
             }
             calcularEms();
+            apuesta = false;
         });
         
        
@@ -257,7 +264,11 @@ public class PokerBoardGui extends JFrame {
         									   botonRepartirRandom.setEnabled(true);
         									   botonRepartirManual.setEnabled(true);
         									   botonFlop.setEnabled(false);
+        									   botonCalcRanyEm.setEnabled(false);
         									   });
+        
+        botonCalcRanyEm.addActionListener(e -> {calcularRanguitos();
+        										calcularEms();});
         
         botonFlop.setEnabled(false);
 
@@ -270,6 +281,7 @@ public class PokerBoardGui extends JFrame {
         controles.add(botonFlop);
         controles.add(botonReiniciar);
         controles.add(botonRecalcular);
+        controles.add(botonCalcRanyEm);
         controles.add(mensaje);
         controles.add(calcularExacto, gbc);
 
@@ -452,6 +464,7 @@ public class PokerBoardGui extends JFrame {
         
         cartasComunes = new ArrayList<Carta>();
         repartoManual = false;
+        apuesta = false;
         stage="preflop";
         botonRecalcular.setEnabled(false);
         calcularExacto.setSelected(repartoManual);
@@ -1046,13 +1059,50 @@ public class PokerBoardGui extends JFrame {
             if (panel.isActivo()) {
             	if(panel.getManual()) {
             		//crear pop up para preguntar que hacer
+            		if(!popupDecision(panel.getName())) {
+            			panel.fold();
+            		}else{
+            			apuesta = true;
+            		}
             		
-            		
-            	}else
+            	}else {
             		if(panel.getEm().getBackground() == Color.red || panel.getRanguito().getBackground() == Color.red) {
             			panel.fold();
-            		}	
+            		}else {
+            			apuesta = true;
+            		}
+            	}
             }
         }
+	}
+	
+	public boolean popupDecision(String nombre) {
+		int resultado;
+		if(apuesta) {
+		    resultado = JOptionPane.showOptionDialog(
+		        this,
+		        "¿Que quieres que haga el jugador?",
+		        nombre,
+		        JOptionPane.YES_NO_OPTION,
+		        JOptionPane.QUESTION_MESSAGE,
+		        null,
+		        new Object[]{"CALL", "FOLD"},
+		        "CALL"
+		    );
+		}else {
+			resultado = JOptionPane.showOptionDialog(
+		        this,
+		        "¿Que quieres que haga el jugador?",
+		        nombre,
+		        JOptionPane.YES_NO_OPTION,
+		        JOptionPane.QUESTION_MESSAGE,
+		        null,
+		        new Object[]{"BET", "FOLD"},
+		        "BET"
+		    );
+	    }
+		
+
+	    return resultado == 0;
 	}
 }
