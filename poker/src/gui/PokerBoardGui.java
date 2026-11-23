@@ -25,6 +25,7 @@ public class PokerBoardGui extends JFrame {
     private JButton botonFlop;
     private JButton botonRecalcular;
     private JButton botonCalcRanyEm;
+	private JButton botonApartado22;
     private String stage = "preflop"; 
     private boolean apuesta = false;
     
@@ -215,7 +216,11 @@ public class PokerBoardGui extends JFrame {
         botonRecalcular.setEnabled(false);
         botonCalcRanyEm = new JButton("Calcular Rang y Em");
         botonCalcRanyEm.setEnabled(false);
-        
+
+		botonApartado22 = new JButton("Mano vs Rango");
+        botonApartado22.addActionListener(e -> {
+            new PokerTurnDecisionGui().setVisible(true);
+        });
 
         botonRepartirManual.addActionListener(e -> {repartoManual = true;
         											botonFlop.setEnabled(true);
@@ -282,6 +287,7 @@ public class PokerBoardGui extends JFrame {
         controles.add(botonReiniciar);
         controles.add(botonRecalcular);
         controles.add(botonCalcRanyEm);
+		controles.add(botonApartado22);
         controles.add(mensaje);
         controles.add(calcularExacto, gbc);
 
@@ -1106,3 +1112,4 @@ public class PokerBoardGui extends JFrame {
 	    return resultado == 0;
 	}
 }
+
