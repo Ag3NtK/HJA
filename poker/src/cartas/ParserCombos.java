@@ -129,4 +129,52 @@ public class ParserCombos {
 		}
 		return listaCombos;
 	}
+	public static ArrayList<ArrayList<Carta>> generarManosDeCombo(String comboNotacion) {
+		ArrayList<ArrayList<Carta>> resultado = new ArrayList<>();
+		if (comboNotacion == null || comboNotacion.length() < 2) {
+			return resultado;
+		}
+
+		String[] palos = {"h", "d", "c", "s"};
+		char c1 = comboNotacion.charAt(0);
+		char c2 = comboNotacion.charAt(1);
+
+		if (comboNotacion.length() == 2 && c1 == c2) {
+			// Pareja: 6 combos
+			for (int i = 0; i < palos.length - 1; i++) {
+				for (int j = i + 1; j < palos.length; j++) {
+					ArrayList<Carta> par = new ArrayList<>();
+					par.add(new Carta("" + c1 + palos[i]));
+					par.add(new Carta("" + c2 + palos[j]));
+					resultado.add(par);
+				}
+			}
+		} else if (comboNotacion.length() == 3) {
+			char tipo = comboNotacion.charAt(2);
+			if (tipo == 's') {
+				// Suited 4 combos
+				for (String p : palos) {
+					ArrayList<Carta> par = new ArrayList<>();
+					par.add(new Carta("" + c1 + p));
+					par.add(new Carta("" + c2 + p));
+					resultado.add(par);
+				}
+			} else if (tipo == 'o') {
+				// Offsuit 12 combos 
+				for (String p1 : palos) {
+					for (String p2 : palos) {
+						if (!p1.equals(p2)) {
+							ArrayList<Carta> par = new ArrayList<>();
+							par.add(new Carta("" + c1 + p1));
+							par.add(new Carta("" + c2 + p2));
+							resultado.add(par);
+						}
+					}
+				}
+			}
+		}
+
+		return resultado;
+	}
 }
+
