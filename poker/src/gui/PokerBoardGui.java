@@ -647,8 +647,8 @@ public class PokerBoardGui extends JFrame {
         		return false;
         	}
         	
-        	String aux = em.getText();
-        	double numero;
+			String aux = em.getText().trim().replace("%", "").trim();  
+			double numero;
         	try {
 		        numero = Double.parseDouble(aux);
 		    } catch (NumberFormatException e) {
@@ -739,7 +739,7 @@ public class PokerBoardGui extends JFrame {
     }
 
 	private boolean actualizarRango(PlayerPanel panel) {
-		String texto = panel.getRanguito().getText();
+		String texto = panel.getRanguito().getText().trim();
 		ArrayList<String> rangoDado;
 
 	    // Evitar errores si el campo está vacío.
@@ -757,7 +757,7 @@ public class PokerBoardGui extends JFrame {
 	        return false;
 	    }
 	    
-	    if(texto.length() == 2 || texto.charAt(2) != '%') {
+	    if(!texto.endsWith("%")) {
 		    rangoDado = ParserCombos.parsearDevolverCombos(texto, panel.getRanguito());
 		    
 		    if(rangoDado == null || panel.getJugador().getCombo() == null) {
