@@ -130,8 +130,8 @@ public class CalculadoraOutsTurn {
         sbDesglose.append(String.format(java.util.Locale.ROOT, "Media = %.2f outs", res.mediaOuts));
         res.desgloseTexto = sbDesglose.toString();
 
-        //  CALL si mediaOuts >= emPorcentaje, FOLD en caso contrario
-        res.esCall = (res.mediaOuts >= emPorcentaje);
+        //  CALL si mediaOuts > emPorcentaje, FOLD en caso contrario
+        res.esCall = (res.mediaOuts > emPorcentaje);
 
         return res;
     }
