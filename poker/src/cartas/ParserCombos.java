@@ -2,6 +2,7 @@ package cartas;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 import javax.swing.JTextField;
@@ -38,25 +39,26 @@ public class ParserCombos {
                 .map(String::trim)                 
                 .filter(item -> !item.isEmpty())   
                 .collect(Collectors.toCollection(ArrayList::new));
-		ArrayList<String> listaCombos = new ArrayList<String>();
-		
-		
+		LinkedHashSet<String> listaCombos = new LinkedHashSet<String>();
 		
 		for(String combo : combosTexto) {
 			try {
-				//comprueba si el combo es un pareja
+				//comprueba si el combo es una pareja o mano sin sufijo s/o
 				if(combo.length() == 2) {
 					valor1 = Rank.fromSymbol(combo.charAt(0));
 					valor2 = Rank.fromSymbol(combo.charAt(1));
 					if(valor1 == valor2)
 						listaCombos.add("" + valor1.getSymbol() + valor1.getSymbol());
-					else 
-						throw new IllegalArgumentException("Pareja no coincide: " + combo);
-					
+					else if(valor1.getValue() > valor2.getValue()) {
+						listaCombos.add("" + valor1.getSymbol() + valor2.getSymbol() + "s");
+						listaCombos.add("" + valor1.getSymbol() + valor2.getSymbol() + "o");
+					} else 
+						throw new IllegalArgumentException("Combo mal construido: " + combo);
 					
 				}else if(combo.length() == 3) {
+					char c2 = Character.toLowerCase(combo.charAt(2));
 					//comprueba si una pareja de cartas distintas esta bien construida
-					if(combo.charAt(2) == 's' || combo.charAt(2) == 'o') {
+					if(c2 == 's' || c2 == 'o') {
 						valor1 = Rank.fromSymbol(combo.charAt(0));
 						valor2 = Rank.fromSymbol(combo.charAt(1));
 						
@@ -64,7 +66,7 @@ public class ParserCombos {
 							throw new IllegalArgumentException("Combo mal construido: " + combo);
 						if (valor1 == valor2) 
 						    throw new IllegalArgumentException("Las parejas no llevan sufijo s/o: " + combo);
-						listaCombos.add("" + valor1.getSymbol() + valor2.getSymbol() + combo.charAt(2));
+						listaCombos.add("" + valor1.getSymbol() + valor2.getSymbol() + c2);
 					//añade esta pareja y las superiores
 					}else if(combo.charAt(2) == '+') {
 						valor1 = Rank.fromSymbol(combo.charAt(0));
@@ -81,8 +83,9 @@ public class ParserCombos {
 						throw new IllegalArgumentException("Combo mal construido: " + combo);
 					
 				}else if(combo.length() == 4) {
+					char c2 = Character.toLowerCase(combo.charAt(2));
 					//comprueba si una pareja de cartas distintas esta bien construida con el +
-					if((combo.charAt(2) == 's' || combo.charAt(2) == 'o') && combo.charAt(3) == '+') {
+					if((c2 == 's' || c2 == 'o') && combo.charAt(3) == '+') {
 						valor1 = Rank.fromSymbol(combo.charAt(0));
 						valor2 = Rank.fromSymbol(combo.charAt(1));
 						
@@ -92,15 +95,33 @@ public class ParserCombos {
 						    throw new IllegalArgumentException("Las parejas no llevan sufijo s/o: " + combo);
 						for(int i = valor2.getValue(); i < valor1.getValue(); i++) {
 							Rank rank = Rank.fromValue(i);
-					        listaCombos.add("" + valor1.getSymbol() + rank.getSymbol() + combo.charAt(2));
+					        listaCombos.add("" + valor1.getSymbol() + rank.getSymbol() + c2);
 						}
 					}else 
 						throw new IllegalArgumentException("Combo mal construido: " + combo);
+				}else if(combo.length() == 5) {
+					//comprueba un rango de parejas 
+					if(combo.charAt(2) == '-') {
+						valor1 = Rank.fromSymbol(combo.charAt(0));
+						valor2 = Rank.fromSymbol(combo.charAt(1));
+						Rank valor3 = Rank.fromSymbol(combo.charAt(3));
+						Rank valor4 = Rank.fromSymbol(combo.charAt(4));
+						if(valor1 == valor2 && valor3 == valor4 && valor1.getValue() >= valor3.getValue()) {
+							for(int i = valor3.getValue(); i <= valor1.getValue(); i++) {
+								Rank rank = Rank.fromValue(i);
+								listaCombos.add("" + rank.getSymbol() + rank.getSymbol());
+							}
+						} else
+							throw new IllegalArgumentException("Combo mal construido: " + combo);
+					}else
+						throw new IllegalArgumentException("Combo mal construido: " + combo);
 				}else if(combo.length() == 7) {
+					char c2 = Character.toLowerCase(combo.charAt(2));
+					char c6 = Character.toLowerCase(combo.charAt(6));
 					//comprueba un rango de parejas
-					if((combo.charAt(2) == 's' || combo.charAt(2) == 'o') 
-						&& (combo.charAt(6) == 's' || combo.charAt(6) == 'o')
-						&& (combo.charAt(2) == combo.charAt(6))
+					if((c2 == 's' || c2 == 'o') 
+						&& (c6 == 's' || c6 == 'o')
+						&& (c2 == c6)
 						&& combo.charAt(3) == '-') {
 						valor1 = Rank.fromSymbol(combo.charAt(0));
 						valor2 = Rank.fromSymbol(combo.charAt(1));
@@ -115,19 +136,21 @@ public class ParserCombos {
 						    throw new IllegalArgumentException("No se pueden poner parejs en este tipo de combos: " + combo);
 						for(int i = valor4.getValue(); i <= valor2.getValue(); i++) {
 							Rank rank = Rank.fromValue(i);
-					        listaCombos.add("" + valor1.getSymbol() + rank.getSymbol() + combo.charAt(2));
+					        listaCombos.add("" + valor1.getSymbol() + rank.getSymbol() + c2);
 						}
 					}else 
 						throw new IllegalArgumentException("Combo mal construido: " + combo);
 				}else
 					throw new IllegalArgumentException("Combo mal construido: " + combo);
 			} catch (Exception e) {
-				ranguito.setText(e.getMessage());
+				if (ranguito != null) {
+					ranguito.setText(e.getMessage());
+				}
 				
 				return null;
 			}
 		}
-		return listaCombos;
+		return new ArrayList<>(listaCombos);
 	}
 	public static ArrayList<ArrayList<Carta>> generarManosDeCombo(String comboNotacion) {
 		ArrayList<ArrayList<Carta>> resultado = new ArrayList<>();
