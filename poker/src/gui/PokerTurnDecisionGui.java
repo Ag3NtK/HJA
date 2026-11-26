@@ -26,7 +26,6 @@ public class PokerTurnDecisionGui extends JFrame {
     private JTextField rangoVillano;
     private JTextArea areaDesglose;
 
-    private JButton botonRepartirManual;
     private JButton botonRepartirRandom;
     private JButton botonElegirHero;
     private JButton botonElegirBoard;
@@ -82,16 +81,6 @@ public class PokerTurnDecisionGui extends JFrame {
         panelCartasHero.setOpaque(false);
         for (int i = 0; i < 2; i++) {
             cartasHero[i] = crearEspacioCarta();
-            cartasHero[i].setCursor(new Cursor(Cursor.HAND_CURSOR));
-            cartasHero[i].setToolTipText("Haz clic para elegir las cartas de Hero");
-            cartasHero[i].addMouseListener(new java.awt.event.MouseAdapter() {
-                @Override
-                public void mouseClicked(java.awt.event.MouseEvent e) {
-                    if (botonRepartirManual.isEnabled()) {
-                        elegirCartasHero();
-                    }
-                }
-            });
             panelCartasHero.add(cartasHero[i]);
         }
         panelHero.add(panelCartasHero);
@@ -172,16 +161,6 @@ public class PokerTurnDecisionGui extends JFrame {
 
         for (int i = 0; i < 4; i++) {
             cartasBoard[i] = crearEspacioCarta();
-            cartasBoard[i].setCursor(new Cursor(Cursor.HAND_CURSOR));
-            cartasBoard[i].setToolTipText("Haz clic para elegir las 4 cartas del Board");
-            cartasBoard[i].addMouseListener(new java.awt.event.MouseAdapter() {
-                @Override
-                public void mouseClicked(java.awt.event.MouseEvent e) {
-                    if (botonRepartirManual.isEnabled()) {
-                        elegirCartasBoard();
-                    }
-                }
-            });
             panelCartasBoard.add(cartasBoard[i]);
         }
 
@@ -261,7 +240,6 @@ public class PokerTurnDecisionGui extends JFrame {
         add(mesa, BorderLayout.CENTER);
 
         //CONTROLES INFERIORES 
-        botonRepartirManual = new JButton("Repartir Manual");
         botonRepartirRandom = new JButton("Repartir Random");
         botonElegirHero = new JButton("Elegir Hero (2)");
         botonElegirBoard = new JButton("Elegir Board (4)");
@@ -269,7 +247,6 @@ public class PokerTurnDecisionGui extends JFrame {
 
         botonReiniciar = new JButton("Reiniciar");
 
-        botonRepartirManual.addActionListener(e -> repartirManualCompleto());
         botonRepartirRandom.addActionListener(e -> repartirRandomCompleto());
         botonElegirHero.addActionListener(e -> elegirCartasHero());
         botonElegirBoard.addActionListener(e -> elegirCartasBoard());
@@ -277,7 +254,6 @@ public class PokerTurnDecisionGui extends JFrame {
         botonReiniciar.addActionListener(e -> reiniciar());
 
         JPanel controles = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 12));
-        controles.add(botonRepartirManual);
         controles.add(botonRepartirRandom);
         controles.add(botonElegirHero);
         controles.add(botonElegirBoard);
@@ -293,49 +269,8 @@ public class PokerTurnDecisionGui extends JFrame {
 
     private void desactivarBotonesReparto() {
         botonRepartirRandom.setEnabled(false);
-        botonRepartirManual.setEnabled(false);
         botonElegirHero.setEnabled(false);
         botonElegirBoard.setEnabled(false);
-    }
-
-    private void repartirManualCompleto() {
-        baraja = new Baraja();
-        listaHero.clear();
-        listaBoard.clear();
-
-        //Elegir 2 cartas para Hero
-        DialogoSeleccionCartas diagHero = new DialogoSeleccionCartas(this, "Elige 2 cartas para Hero", 2, baraja);
-        diagHero.setVisible(true);
-        ArrayList<Carta> selHero = diagHero.getSeleccion();
-        if (selHero.size() != 2) {
-            mensaje.setText("Reparto manual cancelado.");
-            return;
-        }
-        for (Carta c : selHero) {
-            baraja.eliminar(c);
-            listaHero.add(c);
-        }
-        mostrarImagen(cartasHero[0], selHero.get(0).get_carta_PNG());
-        mostrarImagen(cartasHero[1], selHero.get(1).get_carta_PNG());
-
-        //Elegir 4 cartas para el Board 
-        DialogoSeleccionCartas diagBoard = new DialogoSeleccionCartas(this, "Elige 4 cartas para el Board (Turn)", 4, baraja);
-        diagBoard.setVisible(true);
-        ArrayList<Carta> selBoard = diagBoard.getSeleccion();
-        if (selBoard.size() != 4) {
-            mensaje.setText("Reparto de Board cancelado.");
-            return;
-        }
-        for (Carta c : selBoard) {
-            baraja.eliminar(c);
-            listaBoard.add(c);
-        }
-        for (int i = 0; i < 4; i++) {
-            mostrarImagen(cartasBoard[i], selBoard.get(i).get_carta_PNG());
-        }
-
-        desactivarBotonesReparto();
-        mensaje.setText("Mesa rellenada manualmente.");
     }
 
     private void repartirRandomCompleto() {
@@ -479,7 +414,6 @@ public class PokerTurnDecisionGui extends JFrame {
 
         // Habilitar de nuevo los botones de reparto
         botonRepartirRandom.setEnabled(true);
-        botonRepartirManual.setEnabled(true);
         botonElegirHero.setEnabled(true);
         botonElegirBoard.setEnabled(true);
 
